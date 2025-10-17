@@ -1,0 +1,47 @@
+.select-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+}
+
+.select-label {
+  font-weight: 600;
+  color: var(--text-primary);
+  font-size: 0.95rem;
+}
+
+.select-label .required {
+  color: var(--danger-color);
+  margin-left: 2px;
+}
+
+.form-select {
+  padding: var(--spacing-md);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  font-size: 1rem;
+  transition: border-color var(--transition-fast);
+  font-family: inherit;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  cursor: pointer;
+}
+
+.form-select:focus {
+  outline: none;
+  border-color: var(--primary-color);
+}
+
+.form-select:disabled {
+  background: var(--bg-tertiary);
+  cursor: not-allowed;
+}
+
+.form-select.error {
+  border-color: var(--danger-color);
+}
+
+.select-error {
+  color: var(--danger-color);
+  font-size: 0.875rem;
+}

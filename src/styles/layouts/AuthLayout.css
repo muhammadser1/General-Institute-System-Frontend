@@ -1,0 +1,27 @@
+.auth-layout {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+  padding: var(--spacing-lg);
+}
+
+.auth-layout-container {
+  width: 100%;
+  max-width: 450px;
+  background: var(--bg-primary);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-xl);
+  padding: var(--spacing-2xl);
+}
+
+@media (max-width: 768px) {
+  .auth-layout {
+    padding: var(--spacing-md);
+  }
+
+  .auth-layout-container {
+    padding: var(--spacing-xl);
+  }
+}
