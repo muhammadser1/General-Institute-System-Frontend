@@ -9,9 +9,17 @@ const Input = ({
   error,
   required = false,
   disabled = false,
-  className = ''
+  className = '',
+  name
 }) => {
   const inputClass = `form-input ${error ? 'error' : ''} ${className}`.trim()
+  
+  // Determine icon based on field type/name
+  const getIcon = () => {
+    if (name === 'username' || name === 'email') return '👤'
+    if (name === 'password') return '🔒'
+    return ''
+  }
 
   return (
     <div className="input-group">
@@ -21,15 +29,19 @@ const Input = ({
           {required && <span className="required">*</span>}
         </label>
       )}
-      <input
-        type={type}
-        value={value}
-        onChange={onChange}
-        placeholder={placeholder}
-        className={inputClass}
-        required={required}
-        disabled={disabled}
-      />
+      <div className="input-wrapper">
+        {getIcon() && <span className="input-icon">{getIcon()}</span>}
+        <input
+          type={type}
+          name={name}
+          value={value}
+          onChange={onChange}
+          placeholder={placeholder}
+          className={inputClass}
+          required={required}
+          disabled={disabled}
+        />
+      </div>
       {error && <span className="input-error">{error}</span>}
     </div>
   )

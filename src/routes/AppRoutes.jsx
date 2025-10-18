@@ -28,6 +28,8 @@ import ProfilePage from '../pages/profile/ProfilePage'
 // Public Pages
 import HomePage from '../pages/public/HomePage'
 import PricingPublicPage from '../pages/public/PricingPublicPage'
+import ContactPage from '../pages/public/ContactPage'
+import AboutPage from '../pages/public/AboutPage'
 
 // Protected Route Component
 const ProtectedRoute = ({ children, requireAdmin = false }) => {
@@ -53,11 +55,13 @@ function AppRoutes() {
     <Routes>
       {/* Public Routes */}
       <Route path="/" element={<HomePage />} />
+      <Route path="/about" element={<AboutPage />} />
       <Route path="/pricing" element={<PricingPublicPage />} />
+      <Route path="/contact" element={<ContactPage />} />
 
       {/* Auth Routes */}
+      <Route path="/login" element={<LoginPage />} />
       <Route element={<AuthLayout />}>
-        <Route path="/login" element={<LoginPage />} />
         <Route path="/signup" element={<SignupPage />} />
       </Route>
 

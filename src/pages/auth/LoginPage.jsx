@@ -4,8 +4,8 @@ import LoginPageMobile from './LoginPageMobile'
 
 const LoginPage = () => {
   const isMobile = useIsMobile()
-
   return isMobile ? <LoginPageMobile /> : <LoginPageDesktop />
 }
 
 export default LoginPage
+

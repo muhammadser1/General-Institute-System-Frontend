@@ -15,18 +15,35 @@
   margin-left: 2px;
 }
 
+.input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.input-icon {
+  position: absolute;
+  right: var(--spacing-md);
+  font-size: 1.2rem;
+  pointer-events: none;
+  z-index: 1;
+}
+
 .form-input {
   padding: var(--spacing-md);
+  padding-right: 3rem;
   border: 1px solid var(--border-color);
   border-radius: var(--radius-md);
   font-size: 1rem;
-  transition: border-color var(--transition-fast);
+  transition: all var(--transition-fast);
   font-family: inherit;
+  width: 100%;
 }
 
 .form-input:focus {
   outline: none;
-  border-color: var(--primary-color);
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.25);
 }
 
 .form-input:disabled {

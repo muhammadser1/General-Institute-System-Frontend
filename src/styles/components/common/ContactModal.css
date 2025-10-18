@@ -1,0 +1,159 @@
+.contact-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(5px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: var(--spacing-lg);
+  direction: rtl;
+}
+
+.contact-modal {
+  background: #1f2937;
+  border: 2px solid #fbbf24;
+  border-radius: var(--radius-xl);
+  padding: var(--spacing-2xl);
+  max-width: 800px;
+  width: 100%;
+  position: relative;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+}
+
+.modal-close-btn {
+  position: absolute;
+  top: var(--spacing-md);
+  left: var(--spacing-md);
+  width: 40px;
+  height: 40px;
+  background: #fbbf24;
+  border: none;
+  border-radius: 50%;
+  color: #1f2937;
+  font-size: 1.5rem;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all var(--transition-fast);
+}
+
+.modal-close-btn:hover {
+  background: #f59e0b;
+  transform: rotate(90deg);
+}
+
+.modal-title {
+  text-align: center;
+  color: #fbbf24;
+  font-size: 2.5rem;
+  font-weight: 700;
+  margin-bottom: var(--spacing-sm);
+}
+
+.modal-subtitle {
+  text-align: center;
+  color: white;
+  font-size: 1.125rem;
+  margin-bottom: var(--spacing-2xl);
+}
+
+.contact-cards-modal {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--spacing-xl);
+}
+
+.contact-card-modal {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid #fbbf24;
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-xl);
+  text-align: center;
+  transition: all var(--transition-normal);
+}
+
+.contact-card-modal:hover {
+  background: rgba(255, 255, 255, 0.1);
+  transform: translateY(-5px);
+  box-shadow: 0 8px 20px rgba(251, 191, 36, 0.3);
+}
+
+.card-icon-circle {
+  width: 70px;
+  height: 70px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto var(--spacing-lg);
+  border: 2px solid #fbbf24;
+}
+
+.phone-icon {
+  background: #78350f;
+}
+
+.email-icon {
+  background: #1e3a8a;
+}
+
+.support-icon {
+  background: #064e3b;
+}
+
+.card-icon {
+  font-size: 2rem;
+}
+
+.card-title-modal {
+  color: white;
+  font-size: 1.25rem;
+  font-weight: 700;
+  margin-bottom: var(--spacing-md);
+}
+
+.card-info {
+  color: white;
+  font-size: 1rem;
+  font-weight: 500;
+}
+
+@media (max-width: 768px) {
+  .contact-modal-overlay {
+    padding: var(--spacing-md);
+  }
+
+  .contact-modal {
+    padding: var(--spacing-xl);
+  }
+
+  .modal-title {
+    font-size: 1.75rem;
+  }
+
+  .modal-subtitle {
+    font-size: 1rem;
+  }
+
+  .contact-cards-modal {
+    grid-template-columns: 1fr;
+    gap: var(--spacing-lg);
+  }
+
+  .card-icon-circle {
+    width: 60px;
+    height: 60px;
+  }
+
+  .card-icon {
+    font-size: 1.75rem;
+  }
+}
+
