@@ -1,6 +1,7 @@
 import axios from 'axios'
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api/v1'
+// const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://general-institute-system-backend.onrender.com/api/v1'
 
 const api = axios.create({
   baseURL: API_BASE_URL,
@@ -28,10 +29,15 @@ api.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {
-      // Token expired or invalid
-      localStorage.removeItem('access_token')
-      localStorage.removeItem('user')
-      window.location.href = '/login'
+      // Don't redirect if it's a login request (let the login page handle it)
+      const isLoginRequest = error.config?.url?.includes('/user/login')
+      
+      if (!isLoginRequest) {
+        // Token expired or invalid - redirect to login
+        localStorage.removeItem('access_token')
+        localStorage.removeItem('user')
+        window.location.href = '/login'
+      }
     }
     return Promise.reject(error)
   }

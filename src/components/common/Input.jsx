@@ -10,12 +10,14 @@ const Input = ({
   required = false,
   disabled = false,
   className = '',
-  name
+  name,
+  showIcon = false
 }) => {
   const inputClass = `form-input ${error ? 'error' : ''} ${className}`.trim()
   
-  // Determine icon based on field type/name
+  // Determine icon based on field type/name (only if showIcon is true)
   const getIcon = () => {
+    if (!showIcon) return ''
     if (name === 'username' || name === 'email') return '👤'
     if (name === 'password') return '🔒'
     return ''

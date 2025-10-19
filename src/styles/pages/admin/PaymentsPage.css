@@ -89,6 +89,87 @@
   background: var(--bg-tertiary);
 }
 
+/* Mobile Card View */
+.payments-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+}
+
+.payment-card {
+  padding: var(--spacing-md);
+}
+
+.payment-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: var(--spacing-sm);
+}
+
+.payment-student {
+  font-weight: 700;
+  font-size: 1rem;
+  color: var(--text-primary);
+  margin-bottom: 0.25rem;
+}
+
+.payment-date {
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+}
+
+.payment-amount {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--success-color);
+}
+
+.payment-notes {
+  margin: var(--spacing-sm) 0;
+  padding: var(--spacing-sm);
+  background: var(--bg-tertiary);
+  border-radius: var(--radius-sm);
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+}
+
+.payment-actions {
+  margin-top: var(--spacing-sm);
+  display: flex;
+  justify-content: flex-end;
+}
+
+/* Mobile Specific */
+.payments-page-mobile .page-header {
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--spacing-sm);
+}
+
+.payments-page-mobile .page-title {
+  font-size: 1.5rem;
+}
+
+.payments-page-mobile .payments-filters {
+  flex-direction: column;
+}
+
+.payments-page-mobile .payments-summary {
+  grid-template-columns: 1fr;
+}
+
+/* Desktop Table View */
+@media (min-width: 769px) {
+  .payments-page-desktop .payments-table-container {
+    overflow-x: auto;
+  }
+
+  .payments-page-desktop .payments-table {
+    min-width: 700px;
+  }
+}
+
 @media (max-width: 768px) {
   .payments-table-container {
     overflow-x: auto;

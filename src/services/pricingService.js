@@ -7,8 +7,7 @@ export const pricingService = {
     return response.data
   },
 
-  getAllPricing: async (isActive = null) => {
-    const params = isActive !== null ? { is_active: isActive } : {}
+  getAllPricing: async (params = {}) => {
     const response = await api.get('/pricing/', { params })
     return response.data
   },

@@ -1,4 +1,5 @@
 import { createContext, useContext, useState, useEffect } from 'react'
+import { authService } from '../services/authService'
 
 const AuthContext = createContext(null)
 
@@ -27,11 +28,20 @@ export const AuthProvider = ({ children }) => {
     setLoading(false)
   }, [])
 
-  const login = (userData, accessToken) => {
-    setUser(userData)
-    setToken(accessToken)
-    localStorage.setItem('access_token', accessToken)
-    localStorage.setItem('user', JSON.stringify(userData))
+  const login = async (username, password) => {
+    try {
+      const response = await authService.login(username, password)
+      const { access_token, user: userData } = response
+      
+      setUser(userData)
+      setToken(access_token)
+      localStorage.setItem('access_token', access_token)
+      localStorage.setItem('user', JSON.stringify(userData))
+      
+      return userData
+    } catch (error) {
+      throw error
+    }
   }
 
   const logout = () => {
@@ -39,6 +49,7 @@ export const AuthProvider = ({ children }) => {
     setToken(null)
     localStorage.removeItem('access_token')
     localStorage.removeItem('user')
+    // Note: We keep 'remembered_username' so user doesn't have to re-enter it
   }
 
   const value = {

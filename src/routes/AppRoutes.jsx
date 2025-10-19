@@ -8,15 +8,17 @@ import AuthLayout from '../layouts/AuthLayout'
 // Auth Pages
 import LoginPage from '../pages/auth/LoginPage'
 import SignupPage from '../pages/auth/SignupPage'
+import TestLoginPage from '../pages/auth/TestLoginPage'
 
 // Dashboard Pages
-import DashboardPage from '../pages/dashboard/DashboardPage'
+import TeacherDashboardPage from '../pages/dashboard/DashboardPage'
 import LessonsPage from '../pages/lessons/LessonsPage'
 import LessonDetailPage from '../pages/lessons/LessonDetailPage'
 import CreateLessonPage from '../pages/lessons/CreateLessonPage'
 
 // Admin Pages
 import AdminDashboardPage from '../pages/admin/AdminDashboardPage'
+import DashboardPage from '../pages/admin/DashboardPage'
 import UsersManagementPage from '../pages/admin/UsersManagementPage'
 import TeacherEarningsPage from '../pages/admin/TeacherEarningsPage'
 import PaymentsPage from '../pages/admin/PaymentsPage'
@@ -61,13 +63,14 @@ function AppRoutes() {
 
       {/* Auth Routes */}
       <Route path="/login" element={<LoginPage />} />
+      <Route path="/test-login" element={<TestLoginPage />} />
       <Route element={<AuthLayout />}>
         <Route path="/signup" element={<SignupPage />} />
       </Route>
 
       {/* Protected Routes - Teacher */}
       <Route element={<ProtectedRoute><MainLayout /></ProtectedRoute>}>
-        <Route path="/dashboard" element={<DashboardPage />} />
+        <Route path="/dashboard" element={<TeacherDashboardPage />} />
         <Route path="/lessons" element={<LessonsPage />} />
         <Route path="/lessons/:id" element={<LessonDetailPage />} />
         <Route path="/lessons/create" element={<CreateLessonPage />} />
@@ -76,7 +79,8 @@ function AppRoutes() {
 
       {/* Protected Routes - Admin */}
       <Route element={<ProtectedRoute requireAdmin><MainLayout /></ProtectedRoute>}>
-        <Route path="/admin/dashboard" element={<AdminDashboardPage />} />
+        <Route path="/admin" element={<DashboardPage />} />
+        <Route path="/admin/dashboard" element={<DashboardPage />} />
         <Route path="/admin/users" element={<UsersManagementPage />} />
         <Route path="/admin/earnings/:teacherId" element={<TeacherEarningsPage />} />
         <Route path="/admin/payments" element={<PaymentsPage />} />

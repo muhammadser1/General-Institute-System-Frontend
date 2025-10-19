@@ -10,12 +10,13 @@ import '../../styles/pages/auth/LoginPage.css'
 
 const LoginPageMobile = () => {
   const [formData, setFormData] = useState({
-    username: '',
+    username: localStorage.getItem('remembered_username') || '',
     password: ''
   })
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
+  const [rememberMe, setRememberMe] = useState(!!localStorage.getItem('remembered_username'))
   const { login } = useAuth()
   const navigate = useNavigate()
 
@@ -33,10 +34,38 @@ const LoginPageMobile = () => {
     setLoading(true)
 
     try {
-      await login(formData.username, formData.password)
-      navigate('/dashboard')
+      const userData = await login(formData.username, formData.password)
+      
+      // Handle remember me
+      if (rememberMe) {
+        localStorage.setItem('remembered_username', formData.username)
+      } else {
+        localStorage.removeItem('remembered_username')
+      }
+      
+      // Redirect based on user role
+      if (userData.role === 'admin') {
+        navigate('/admin')
+      } else {
+        navigate('/dashboard')
+      }
     } catch (err) {
-      setError(err.response?.data?.message || 'فشل تسجيل الدخول. الرجاء المحاولة مرة أخرى.')
+      let errorMessage = 'فشل تسجيل الدخول. الرجاء المحاولة مرة أخرى.'
+      
+      if (err.response?.data?.detail) {
+        const detail = err.response.data.detail
+        if (detail.toLowerCase().includes('incorrect') || detail.toLowerCase().includes('invalid')) {
+          errorMessage = 'اسم المستخدم أو كلمة المرور غير صحيحة'
+        } else if (detail.toLowerCase().includes('not found')) {
+          errorMessage = 'المستخدم غير موجود'
+        } else {
+          errorMessage = detail
+        }
+      } else if (err.message) {
+        errorMessage = err.message
+      }
+      
+      setError(errorMessage)
     } finally {
       setLoading(false)
     }
@@ -57,7 +86,11 @@ const LoginPageMobile = () => {
             <p>مرحباً بك مرة أخرى</p>
           </div>
 
-          {error && <Alert type="error" message={error} />}
+          {error && (
+            <div className="error-message">
+              <Alert type="error" message={error} />
+            </div>
+          )}
 
           <form onSubmit={handleSubmit} className="login-form">
             <Input
@@ -91,7 +124,11 @@ const LoginPageMobile = () => {
 
             <div className="login-options">
               <label className="remember-me">
-                <input type="checkbox" />
+                <input 
+                  type="checkbox" 
+                  checked={rememberMe}
+                  onChange={(e) => setRememberMe(e.target.checked)}
+                />
                 <span>تذكرني</span>
               </label>
             </div>

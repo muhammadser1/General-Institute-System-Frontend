@@ -70,6 +70,21 @@
   margin: 0;
 }
 
+.error-message {
+  animation: slideDown 0.3s ease-out;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 .login-form {
   display: flex;
   flex-direction: column;
@@ -123,6 +138,12 @@
   width: 18px;
   height: 18px;
   cursor: pointer;
+  accent-color: #42a5f5;
+  transition: all 0.2s;
+}
+
+.remember-me input:hover {
+  transform: scale(1.1);
 }
 
 /* Mobile Styles */
