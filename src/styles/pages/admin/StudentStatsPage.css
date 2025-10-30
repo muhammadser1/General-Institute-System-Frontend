@@ -1,0 +1,235 @@
+/* System Overview CSS */
+.overview-container {
+  width: 100%;
+  min-height: 100vh;
+  margin: 0;
+  padding: 40px 20px;
+  background: url('../../public/images/Element.png') no-repeat center top, linear-gradient(to bottom, #7BCBD4, #A8E6EF);
+  background-size: cover;
+  background-attachment: fixed;
+  color: #264653;
+  font-family: 'Poppins', sans-serif;
+  position: relative;
+  border-radius: 15px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.overview-header {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.title {
+  text-align: center;
+  font-size: 2.5rem;
+  color: #264653;
+  margin: 0 auto;
+  font-weight: bold;
+  background-color: #5FBFC9;
+  padding: 15px;
+  border-radius: 10px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+  width: fit-content;
+}
+
+.filter-section {
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+  margin-bottom: 30px;
+  flex-wrap: wrap;
+}
+
+.filter-section label {
+  font-size: 1.1rem;
+  color: #264653;
+  margin-right: 5px;
+}
+
+.filter-input {
+  padding: 10px 15px;
+  font-size: 1rem;
+  border: 2px solid #4FAEB8;
+  border-radius: 8px;
+  transition: border 0.3s ease, box-shadow 0.3s ease;
+  background-color: #F1FAEE;
+  color: #264653;
+}
+
+.filter-input:focus {
+  border-color: #5FBFC9;
+  box-shadow: 0 0 8px rgba(95, 191, 201, 0.6);
+  outline: none;
+}
+
+.stats-section {
+  margin-top: 20px;
+}
+
+.stats-section h2 {
+  text-align: center;
+  font-size: 2rem;
+  color: #264653;
+  margin-bottom: 20px;
+  background-color: #A8E6EF;
+  padding: 10px;
+  border-radius: 10px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.table-wrapper {
+  overflow-x: auto;
+  margin-bottom: 40px;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.stats-table {
+  width: 100%;
+  border-collapse: collapse;
+  background-color: #F1FAEE;
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.stats-table th,
+.stats-table td {
+  text-align: center;
+  padding: 12px 15px;
+  border-bottom: 1px solid #A8E6EF;
+  font-weight: bold;
+}
+
+.stats-table th {
+  background-color: #4FAEB8;
+  color: #F1FAEE;
+  font-size: 1.1rem;
+}
+
+.stats-table tr:nth-child(even) {
+  background-color: #D0F4F7;
+}
+
+.stats-table tr:hover {
+  background-color: #A8E6EF;
+  color: #264653;
+  transition: background-color 0.3s ease;
+}
+
+.error {
+  color: #e74c3c;
+  text-align: center;
+  font-size: 1.1rem;
+  background-color: #fdf2f2;
+  padding: 15px;
+  border-radius: 8px;
+  border: 1px solid #fecaca;
+  margin: 20px 0;
+}
+
+/* Mobile Card Layout */
+.students-cards-mobile {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 15px;
+  margin-bottom: 20px;
+}
+
+.student-card-mobile {
+  background-color: #F1FAEE;
+  border-radius: 10px;
+  padding: 15px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  border: 1px solid #A8E6EF;
+}
+
+.student-header-mobile {
+  text-align: center;
+  margin-bottom: 15px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #A8E6EF;
+}
+
+.student-name {
+  font-size: 1.2rem;
+  color: #264653;
+  margin: 0 0 5px 0;
+  font-weight: bold;
+}
+
+.education-level {
+  font-size: 0.9rem;
+  color: #4FAEB8;
+  margin: 0;
+  font-weight: 600;
+}
+
+.student-totals-mobile {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 10px;
+}
+
+.total-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 12px;
+  border-radius: 6px;
+  background-color: #D0F4F7;
+}
+
+.total-item.individual {
+  background-color: #E8F5E8;
+}
+
+.total-item.group {
+  background-color: #FFF3E0;
+}
+
+.total-item.total {
+  background-color: #E3F2FD;
+  font-weight: bold;
+}
+
+.total-label {
+  font-size: 0.9rem;
+  color: #264653;
+}
+
+.total-value {
+  font-size: 1rem;
+  font-weight: bold;
+  color: #4FAEB8;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .title {
+    font-size: 2rem;
+    padding: 10px;
+  }
+
+  .filter-section {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .filter-input {
+    width: 80%;
+    font-size: 1rem;
+    margin-bottom: 10px;
+  }
+
+  .stats-section h2 {
+    font-size: 1.5rem;
+  }
+
+  .stats-table th,
+  .stats-table td {
+    padding: 10px;
+    font-size: 0.9rem;
+  }
+}

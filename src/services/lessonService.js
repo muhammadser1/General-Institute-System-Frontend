@@ -17,12 +17,12 @@ export const lessonService = {
   },
 
   updateLesson: async (lessonId, lessonData) => {
-    const response = await api.put(`/lessons/${lessonId}`, lessonData)
+    const response = await api.put(`/lessons/update-lesson/${lessonId}`, lessonData)
     return response.data
   },
 
   deleteLesson: async (lessonId) => {
-    const response = await api.delete(`/lessons/${lessonId}`)
+    const response = await api.delete(`/lessons/delete-lesson/${lessonId}`)
     return response.data
   },
 

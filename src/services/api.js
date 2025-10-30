@@ -6,7 +6,14 @@ const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000
 const api = axios.create({
   baseURL: API_BASE_URL,
   headers: {
-    'Content-Type': 'application/json',
+    'Content-Type': 'application/json; charset=utf-8',
+    'Accept': 'application/json; charset=utf-8',
+  },
+  paramsSerializer: {
+    encode: (param, key) => {
+      // Ensure proper encoding for URL parameters, especially Arabic text
+      return encodeURIComponent(param)
+    },
   },
 })
 

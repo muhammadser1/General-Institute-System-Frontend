@@ -28,14 +28,10 @@ export const pricingService = {
   },
 
   // User Pricing Lookup
-  lookupPrice: async (subject) => {
-    const response = await api.get(`/pricing/lookup/${subject}`)
-    return response.data
-  },
-
-  // Public Pricing
-  getPublicPricing: async () => {
-    const response = await api.get('/pricing/public/all')
+  lookupPrice: async (subject, educationLevel, lessonType = 'individual') => {
+    const response = await api.get(`/pricing/lookup/${subject}/${educationLevel}`, {
+      params: { lesson_type: lessonType }
+    })
     return response.data
   }
 }

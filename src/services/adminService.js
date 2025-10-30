@@ -27,19 +27,31 @@ export const adminService = {
     return response.data
   },
 
-  resetPassword: async (userId, passwordData) => {
-    const response = await api.post(`/admin/users/${userId}/reset-password`, passwordData)
-    return response.data
-  },
-
-  // Earnings
-  getTeacherEarnings: async (teacherId, month, year) => {
-    const response = await api.get(`/admin/teacher-earnings/${teacherId}`, {
-      params: { month, year }
+  resetPassword: async (userId, newPassword) => {
+    const response = await api.post(`/admin/users/${userId}/reset-password`, {
+      old_password: 'string', // API expects this field (can be empty or placeholder for admin)
+      new_password: newPassword
     })
     return response.data
   },
 
+  // Admin Lesson Management
+  getAdminLessons: async (filters = {}) => {
+    const response = await api.get('/lessons/admin/all', { params: filters })
+    return response.data
+  },
+
+  approveLesson: async (lessonId) => {
+    const response = await api.put(`/lessons/admin/approve/${lessonId}`)
+    return response.data
+  },
+
+  rejectLesson: async (lessonId) => {
+    const response = await api.put(`/lessons/admin/reject/${lessonId}`)
+    return response.data
+  },
+
+  // Legacy endpoints (kept for backward compatibility)
   getSubjectPrices: async () => {
     const response = await api.get('/admin/subject-prices')
     return response.data

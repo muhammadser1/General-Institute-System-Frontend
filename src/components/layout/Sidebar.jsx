@@ -18,8 +18,10 @@ const Sidebar = () => {
   const adminMenuItems = [
     { path: '/admin/dashboard', label: 'Admin Dashboard', icon: '🏠' },
     { path: '/admin/users', label: 'Users', icon: '👥' },
-    { path: '/admin/payments', label: 'Payments', icon: '💰' },
-    { path: '/admin/pricing', label: 'Pricing', icon: '💵' }
+    { path: '/admin/students', label: 'Students', icon: '👨‍🎓' },
+    { path: '/admin/lessons', label: 'Lessons', icon: '📚' },
+    { path: '/admin/teacher-stats', label: 'Teacher Stats', icon: '📊' },
+    { path: '/admin/student-stats', label: 'Student Stats', icon: '📈' }
   ]
 
   const menuItems = user?.role === 'admin' ? adminMenuItems : teacherMenuItems

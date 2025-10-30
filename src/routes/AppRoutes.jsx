@@ -20,9 +20,14 @@ import CreateLessonPage from '../pages/lessons/CreateLessonPage'
 import AdminDashboardPage from '../pages/admin/AdminDashboardPage'
 import DashboardPage from '../pages/admin/DashboardPage'
 import UsersManagementPage from '../pages/admin/UsersManagementPage'
+import StudentsManagementPage from '../pages/admin/StudentsManagementPage'
 import TeacherEarningsPage from '../pages/admin/TeacherEarningsPage'
 import PaymentsPage from '../pages/admin/PaymentsPage'
+import MainPaymentsPage from '../pages/admin/MainPaymentsPage'
 import PricingPage from '../pages/admin/PricingPage'
+import TeacherStatsPage from '../pages/admin/TeacherStatsPage'
+import StudentStatsPage from '../pages/admin/StudentStatsPage'
+import LessonsManagementPage from '../pages/admin/LessonsManagementPage'
 
 // Profile Pages
 import ProfilePage from '../pages/profile/ProfilePage'
@@ -82,9 +87,11 @@ function AppRoutes() {
         <Route path="/admin" element={<DashboardPage />} />
         <Route path="/admin/dashboard" element={<DashboardPage />} />
         <Route path="/admin/users" element={<UsersManagementPage />} />
-        <Route path="/admin/earnings/:teacherId" element={<TeacherEarningsPage />} />
-        <Route path="/admin/payments" element={<PaymentsPage />} />
-        <Route path="/admin/pricing" element={<PricingPage />} />
+        <Route path="/admin/students" element={<StudentsManagementPage />} />
+             <Route path="/admin/teacher-stats" element={<TeacherStatsPage />} />
+             <Route path="/admin/student-stats" element={<StudentStatsPage />} />
+             <Route path="/admin/lessons" element={<LessonsManagementPage />} />
+             <Route path="/admin/earnings/:teacherId" element={<TeacherEarningsPage />} />
       </Route>
 
       {/* Catch all - redirect to home */}

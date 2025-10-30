@@ -14,8 +14,45 @@ const PricingPageDesktop = () => {
   const [success, setSuccess] = useState('')
   const [modalError, setModalError] = useState('')
   
+  // Subject mapping
+  const subjectLabels = {
+    'Arabic': 'عربي',
+    'Hebrew': 'عبراني',
+    'English': 'انجليزي',
+    'Math': 'رياضيات',
+    'History': 'تاريخ',
+    'Religion': 'دين',
+    'Geography': 'جغرافيا',
+    'Physics': 'فيزيا',
+    'Electronics': 'مخترونيكا',
+    'Civics': 'مدنيات',
+    'Chemistry': 'كيميا',
+    'Biology': 'بيولوجيا',
+    'Environment': 'بيئه',
+    'Technology': 'تكنولوجيا',
+    'Computer': 'حاسوب',
+    'Science': 'علوم',
+    'Adapted Teaching': 'הוראה מותאמת',
+    'Architecture': 'אדריכלות',
+    'Statistics': 'סטטיסטיקה'
+  }
+  
+  // Function to get subject label
+  const getSubjectLabel = (subject) => {
+    return subjectLabels[subject] || subject
+  }
+  
+  // Function to get education level label
+  const getEducationLevelLabel = (level) => {
+    const labels = {
+      'elementary': 'ابتدائي',
+      'middle': 'اعدادي',
+      'secondary': 'ثانوي'
+    }
+    return labels[level] || level
+  }
+  
   // Filters
-  const [activeFilter, setActiveFilter] = useState('')
   const [searchQuery, setSearchQuery] = useState('')
   
   // Modals
@@ -27,11 +64,9 @@ const PricingPageDesktop = () => {
   // Form data
   const [formData, setFormData] = useState({
     subject: '',
-    customSubject: '',
+    education_level: 'elementary',
     individual_price: '',
-    group_price: '',
-    currency: 'USD',
-    is_active: true
+    group_price: ''
   })
 
   // Fetch pricing
@@ -39,21 +74,10 @@ const PricingPageDesktop = () => {
     setLoading(true)
     setError('')
     try {
-      const params = {}
-      if (activeFilter !== '') {
-        params.is_active = activeFilter === 'true'
-      }
-      
-      console.log('🔍 Fetching pricing with params:', params)
-      const response = await pricingService.getAllPricing(params)
-      console.log('📦 API Response:', response)
-      console.log('💰 Pricing array:', response.pricing)
-      console.log('📊 Total pricing items:', response.pricing?.length)
-      
+      const response = await pricingService.getAllPricing()
       setPricing(response.pricing || [])
     } catch (err) {
-      console.error('❌ Error fetching pricing:', err)
-      console.error('❌ Error response:', err.response)
+      console.error('Error fetching pricing:', err)
       setError(err.response?.data?.detail || 'فشل تحميل الأسعار')
     } finally {
       setLoading(false)
@@ -62,7 +86,7 @@ const PricingPageDesktop = () => {
 
   useEffect(() => {
     fetchPricing()
-  }, [activeFilter])
+  }, [])
 
   // Filter pricing by search query
   const filteredPricing = pricing.filter(item => {
@@ -77,11 +101,10 @@ const PricingPageDesktop = () => {
     setModalError('')
     try {
       const data = {
-        subject: formData.subject === 'Other' ? formData.customSubject : formData.subject,
+        subject: formData.subject,
+        education_level: formData.education_level,
         individual_price: parseFloat(formData.individual_price),
-        group_price: parseFloat(formData.group_price),
-        currency: formData.currency,
-        is_active: formData.is_active
+        group_price: parseFloat(formData.group_price)
       }
       
       console.log('📤 Sending pricing data:', data)
@@ -111,8 +134,7 @@ const PricingPageDesktop = () => {
     try {
       const data = {
         individual_price: parseFloat(formData.individual_price),
-        group_price: parseFloat(formData.group_price),
-        is_active: formData.is_active
+        group_price: parseFloat(formData.group_price)
       }
       
       await pricingService.updatePricing(selectedPricing.id, data)
@@ -152,11 +174,9 @@ const PricingPageDesktop = () => {
   const resetForm = () => {
     setFormData({
       subject: '',
-      customSubject: '',
+      education_level: 'elementary',
       individual_price: '',
-      group_price: '',
-      currency: 'USD',
-      is_active: true
+      group_price: ''
     })
     setModalError('')
   }
@@ -166,10 +186,9 @@ const PricingPageDesktop = () => {
     setSelectedPricing(item)
     setFormData({
       subject: item.subject,
+      education_level: item.education_level,
       individual_price: item.individual_price,
-      group_price: item.group_price,
-      currency: item.currency || 'USD',
-      is_active: item.is_active
+      group_price: item.group_price
     })
     setShowEditModal(true)
   }
@@ -206,15 +225,6 @@ const PricingPageDesktop = () => {
           onChange={(e) => setSearchQuery(e.target.value)}
           className="search-input"
         />
-        <Select
-          value={activeFilter}
-          onChange={(e) => { setActiveFilter(e.target.value) }}
-          options={[
-            { value: '', label: 'جميع الحالات' },
-            { value: 'true', label: 'نشط' },
-            { value: 'false', label: 'غير نشط' }
-          ]}
-        />
       </div>
 
       {/* Pricing Table */}
@@ -228,18 +238,16 @@ const PricingPageDesktop = () => {
             <thead>
               <tr>
                 <th>المادة</th>
+                <th>المرحلة التعليمية</th>
                 <th>السعر الفردي</th>
                 <th>السعر الجماعي</th>
-                <th>العملة</th>
-                <th>الحالة</th>
-                <th>تاريخ الإنشاء</th>
                 <th>الإجراءات</th>
               </tr>
             </thead>
             <tbody>
               {filteredPricing.length === 0 ? (
                 <tr>
-                  <td colSpan="7" style={{ textAlign: 'center', padding: '2rem' }}>
+                  <td colSpan="5" style={{ textAlign: 'center', padding: '2rem' }}>
                     لا توجد نتائج
                   </td>
                 </tr>
@@ -247,15 +255,9 @@ const PricingPageDesktop = () => {
                 filteredPricing.map((item) => (
                   <tr key={item.id}>
                     <td>{item.subject}</td>
-                    <td>{item.individual_price.toFixed(2)} {item.currency}</td>
-                    <td>{item.group_price.toFixed(2)} {item.currency}</td>
-                    <td>{item.currency}</td>
-                    <td>
-                      <span className={`badge badge-${item.is_active ? 'active' : 'inactive'}`}>
-                        {item.is_active ? 'نشط' : 'غير نشط'}
-                      </span>
-                    </td>
-                    <td>{item.created_at ? new Date(item.created_at).toLocaleDateString('en-GB') : '-'}</td>
+                    <td>{getEducationLevelLabel(item.education_level)}</td>
+                    <td>{item.individual_price.toFixed(2)} ₪</td>
+                    <td>{item.group_price.toFixed(2)} ₪</td>
                     <td>
                       <div className="pricing-actions">
                         <button
@@ -284,42 +286,34 @@ const PricingPageDesktop = () => {
       <Modal isOpen={showCreateModal} onClose={() => { setShowCreateModal(false); resetForm() }} title="إضافة سعر جديد">
         {modalError && <Alert type="error" message={modalError} />}
         <form onSubmit={handleCreate} className="pricing-form">
-          <Select
+          <Input
             name="subject"
-            label="المادة"
+            label="المادة *"
             value={formData.subject}
-            onChange={(e) => setFormData({ ...formData, subject: e.target.value, customSubject: '' })}
+            onChange={(e) => setFormData({ ...formData, subject: e.target.value })}
+            required
+            placeholder="أدخل اسم المادة (مثال: Mathematics، Arabic، Physics)"
+          />
+          
+          <Select
+            name="education_level"
+            label="المرحلة التعليمية *"
+            value={formData.education_level}
+            onChange={(e) => setFormData({ ...formData, education_level: e.target.value })}
             required
             options={[
-              { value: '', label: 'اختر المادة' },
-              { value: 'Math', label: 'رياضيات' },
-              { value: 'Physics', label: 'فيزياء' },
-              { value: 'Chemistry', label: 'كيمياء' },
-              { value: 'Biology', label: 'أحياء' },
-              { value: 'English', label: 'إنجليزية' },
-              { value: 'Arabic', label: 'عربية' },
-              { value: 'Computer Science', label: 'حاسوب' },
-              { value: 'History', label: 'تاريخ' },
-              { value: 'Geography', label: 'جغرافيا' },
-              { value: 'Other', label: 'أخرى (مخصص)' }
+              { value: 'elementary', label: 'ابتدائي (Elementary)' },
+              { value: 'middle', label: 'اعدادي (Middle)' },
+              { value: 'secondary', label: 'ثانوي (Secondary)' }
             ]}
           />
-          {formData.subject === 'Other' && (
-            <Input
-              name="customSubject"
-              label="اسم المادة المخصص"
-              value={formData.customSubject}
-              onChange={(e) => setFormData({ ...formData, customSubject: e.target.value })}
-              required
-              placeholder="أدخل اسم المادة"
-            />
-          )}
+          
           <div className="form-row">
             <Input
               type="number"
               step="0.01"
               name="individual_price"
-              label="السعر الفردي"
+              label="السعر الفردي (₪ / ساعة)"
               value={formData.individual_price}
               onChange={(e) => setFormData({ ...formData, individual_price: e.target.value })}
               required
@@ -329,36 +323,11 @@ const PricingPageDesktop = () => {
               type="number"
               step="0.01"
               name="group_price"
-              label="السعر الجماعي"
+              label="السعر الجماعي (₪ / ساعة)"
               value={formData.group_price}
               onChange={(e) => setFormData({ ...formData, group_price: e.target.value })}
               required
               placeholder="0.00"
-            />
-          </div>
-          <div className="form-row">
-            <Select
-              name="currency"
-              label="العملة"
-              value={formData.currency}
-              onChange={(e) => setFormData({ ...formData, currency: e.target.value })}
-              options={[
-                { value: 'USD', label: 'دولار (USD)' },
-                { value: 'EUR', label: 'يورو (EUR)' },
-                { value: 'SAR', label: 'ريال سعودي (SAR)' },
-                { value: 'AED', label: 'درهم إماراتي (AED)' },
-                { value: 'IQD', label: 'دينار عراقي (IQD)' }
-              ]}
-            />
-            <Select
-              name="is_active"
-              label="الحالة"
-              value={formData.is_active}
-              onChange={(e) => setFormData({ ...formData, is_active: e.target.value === 'true' })}
-              options={[
-                { value: 'true', label: 'نشط' },
-                { value: 'false', label: 'غير نشط' }
-              ]}
             />
           </div>
           <div className="form-actions">
@@ -372,17 +341,18 @@ const PricingPageDesktop = () => {
         </form>
       </Modal>
 
-      {/* Edit Pricing Modal */}
-      <Modal isOpen={showEditModal} onClose={() => { setShowEditModal(false); resetForm() }} title="تعديل السعر">
-        {modalError && <Alert type="error" message={modalError} />}
-        <form onSubmit={handleEdit} className="pricing-form">
-          <p><strong>المادة:</strong> {selectedPricing?.subject}</p>
+             {/* Edit Pricing Modal */}
+       <Modal isOpen={showEditModal} onClose={() => { setShowEditModal(false); resetForm() }} title="تعديل السعر">
+         {modalError && <Alert type="error" message={modalError} />}
+         <form onSubmit={handleEdit} className="pricing-form">
+           <p><strong>المادة:</strong> {selectedPricing ? selectedPricing.subject : ''}</p>
+           <p><strong>المرحلة التعليمية:</strong> {selectedPricing ? getEducationLevelLabel(selectedPricing.education_level) : ''}</p>
           <div className="form-row">
             <Input
               type="number"
               step="0.01"
               name="individual_price"
-              label="السعر الفردي"
+              label="السعر الفردي (₪ / ساعة)"
               value={formData.individual_price}
               onChange={(e) => setFormData({ ...formData, individual_price: e.target.value })}
               required
@@ -392,36 +362,11 @@ const PricingPageDesktop = () => {
               type="number"
               step="0.01"
               name="group_price"
-              label="السعر الجماعي"
+              label="السعر الجماعي (₪ / ساعة)"
               value={formData.group_price}
               onChange={(e) => setFormData({ ...formData, group_price: e.target.value })}
               required
               placeholder="0.00"
-            />
-          </div>
-          <div className="form-row">
-            <Select
-              name="currency"
-              label="العملة"
-              value={formData.currency}
-              onChange={(e) => setFormData({ ...formData, currency: e.target.value })}
-              options={[
-                { value: 'USD', label: 'دولار (USD)' },
-                { value: 'EUR', label: 'يورو (EUR)' },
-                { value: 'SAR', label: 'ريال سعودي (SAR)' },
-                { value: 'AED', label: 'درهم إماراتي (AED)' },
-                { value: 'IQD', label: 'دينار عراقي (IQD)' }
-              ]}
-            />
-            <Select
-              name="is_active"
-              label="الحالة"
-              value={formData.is_active}
-              onChange={(e) => setFormData({ ...formData, is_active: e.target.value === 'true' })}
-              options={[
-                { value: 'true', label: 'نشط' },
-                { value: 'false', label: 'غير نشط' }
-              ]}
             />
           </div>
           <div className="form-actions">
@@ -435,10 +380,10 @@ const PricingPageDesktop = () => {
         </form>
       </Modal>
 
-      {/* Delete Confirmation Modal */}
-      <Modal isOpen={showDeleteModal} onClose={() => { setShowDeleteModal(false); setSelectedPricing(null) }} title="تأكيد الحذف">
-        <div className="delete-confirmation">
-          <p>هل أنت متأكد من حذف سعر المادة <strong>{selectedPricing?.subject}</strong>؟</p>
+             {/* Delete Confirmation Modal */}
+       <Modal isOpen={showDeleteModal} onClose={() => { setShowDeleteModal(false); setSelectedPricing(null) }} title="تأكيد الحذف">
+         <div className="delete-confirmation">
+           <p>هل أنت متأكد من حذف سعر المادة <strong>{selectedPricing ? getSubjectLabel(selectedPricing.subject) : ''}</strong>؟</p>
           <p className="warning-text">لا يمكن التراجع عن هذا الإجراء.</p>
           <div className="form-actions">
             <Button type="button" variant="secondary" onClick={() => { setShowDeleteModal(false); setSelectedPricing(null) }}>

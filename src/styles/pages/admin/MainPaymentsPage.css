@@ -1,0 +1,194 @@
+.main-payments-page {
+  padding: 2rem;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.page-header {
+  margin-bottom: 2rem;
+}
+
+.page-title {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #1e40af;
+  margin: 0;
+}
+
+/* Filters */
+.payments-filters {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 2rem;
+  flex-wrap: wrap;
+}
+
+.payments-filters .search-input {
+  flex: 1;
+  min-width: 200px;
+}
+
+/* Stats Cards */
+.payments-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.stat-card {
+  background: white;
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.stat-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.stat-icon {
+  font-size: 3rem;
+  line-height: 1;
+}
+
+.stat-content {
+  flex: 1;
+}
+
+.stat-value {
+  font-size: 1.8rem;
+  font-weight: 800;
+  color: #1e40af;
+  margin-bottom: 0.25rem;
+}
+
+.stat-label {
+  font-size: 0.9rem;
+  color: #666;
+  font-weight: 500;
+}
+
+.stat-paid .stat-value {
+  color: #059669;
+}
+
+.stat-debts .stat-value {
+  color: #dc2626;
+}
+
+.stat-students .stat-value {
+  color: #7c3aed;
+}
+
+/* Table */
+.payments-table-container {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+  margin-bottom: 2rem;
+}
+
+.payments-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.payments-table thead {
+  background: #f3f4f6;
+}
+
+.payments-table th {
+  padding: 1rem;
+  text-align: right;
+  font-weight: 600;
+  color: #374151;
+  font-size: 0.9rem;
+  border-bottom: 2px solid #e5e7eb;
+}
+
+.payments-table td {
+  padding: 1rem;
+  border-bottom: 1px solid #e5e7eb;
+  color: #374151;
+}
+
+.payments-table tbody tr:hover {
+  background: #f9fafb;
+}
+
+.payments-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.student-name {
+  font-weight: 600;
+  color: #1e40af;
+}
+
+.amount-paid {
+  font-weight: 600;
+  color: #059669;
+}
+
+.balance.has-balance {
+  color: #dc2626;
+  font-weight: 600;
+}
+
+.paid-badge {
+  background: #d1fae5;
+  color: #065f46;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+
+/* Actions */
+.payments-actions {
+  display: flex;
+  gap: 1rem;
+  justify-content: flex-end;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .main-payments-page {
+    padding: 1rem;
+  }
+
+  .payments-filters {
+    flex-direction: column;
+  }
+
+  .payments-filters .search-input {
+    width: 100%;
+  }
+
+  .payments-stats {
+    grid-template-columns: 1fr;
+  }
+
+  .payments-table-container {
+    overflow-x: auto;
+  }
+
+  .payments-table {
+    min-width: 700px;
+  }
+
+  .payments-actions {
+    flex-direction: column;
+  }
+
+  .payments-actions button {
+    width: 100%;
+  }
+}

@@ -1,26 +1,24 @@
 .create-lesson-page {
   width: 100%;
-  max-width: 800px;
-  margin: 0 auto;
+  padding: var(--spacing-lg);
 }
 
 .page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
   margin-bottom: var(--spacing-xl);
+  flex-wrap: wrap;
+  gap: var(--spacing-md);
 }
 
 .page-title {
   font-size: 2rem;
   font-weight: 700;
   color: var(--text-primary);
-  margin-bottom: var(--spacing-sm);
 }
 
-.page-subtitle {
-  color: var(--text-secondary);
-  font-size: 1rem;
-}
-
-.lesson-form {
+.create-lesson-form {
   background: var(--bg-primary);
   padding: var(--spacing-xl);
   border-radius: var(--radius-lg);
@@ -32,81 +30,130 @@
   margin-bottom: var(--spacing-xl);
 }
 
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--spacing-lg);
+  flex-wrap: wrap;
+  gap: var(--spacing-md);
+}
+
 .section-title {
   font-size: 1.25rem;
   font-weight: 700;
   color: var(--text-primary);
-  margin-bottom: var(--spacing-lg);
+  margin: 0;
   padding-bottom: var(--spacing-sm);
   border-bottom: 2px solid var(--border-color);
-}
-
-.form-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: var(--spacing-lg);
 }
 
 .form-group {
   display: flex;
   flex-direction: column;
   gap: var(--spacing-sm);
+  margin-bottom: var(--spacing-lg);
 }
 
-.form-group.full-width {
-  grid-column: 1 / -1;
-}
-
-.form-label {
+.form-group label {
   font-weight: 600;
   color: var(--text-primary);
   font-size: 0.95rem;
 }
 
-.form-label .required {
-  color: var(--danger-color);
-}
-
-.form-input,
-.form-select,
-.form-textarea {
+.form-group textarea {
   padding: var(--spacing-md);
   border: 1px solid var(--border-color);
   border-radius: var(--radius-md);
   font-size: 1rem;
   transition: border-color var(--transition-fast);
   font-family: inherit;
-}
-
-.form-input:focus,
-.form-select:focus,
-.form-textarea:focus {
-  outline: none;
-  border-color: var(--primary-color);
-}
-
-.form-textarea {
   resize: vertical;
   min-height: 100px;
 }
 
-.form-error {
-  color: var(--danger-color);
+.form-group textarea:focus {
+  outline: none;
+  border-color: var(--primary-color);
+}
+
+.form-group select {
+  padding: var(--spacing-md);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  font-size: 1rem;
+  transition: border-color var(--transition-fast);
+  font-family: inherit;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+}
+
+.form-group select:focus {
+  outline: none;
+  border-color: var(--primary-color);
+}
+
+.disabled-input {
+  background-color: var(--bg-tertiary);
+  color: var(--text-secondary);
+  cursor: not-allowed;
+}
+
+.form-help {
+  color: var(--text-secondary);
   font-size: 0.875rem;
+  margin-top: var(--spacing-xs);
+  display: block;
 }
 
-.students-section {
-  margin-top: var(--spacing-lg);
-}
-
-.student-input-group {
+/* Students Section */
+.student-item {
   display: flex;
+  align-items: center;
   gap: var(--spacing-md);
   margin-bottom: var(--spacing-md);
+  padding: var(--spacing-sm) var(--spacing-md);
+  background: var(--bg-secondary);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-color);
 }
 
-.student-input-group input {
+.student-inputs {
+  display: flex;
+  gap: var(--spacing-md);
   flex: 1;
+  flex-wrap: wrap;
+}
+
+.student-inputs .searchable-select {
+  max-width: 400px;
+  flex: 1;
+}
+
+.student-inputs input {
+  flex: 1;
+  min-width: 150px;
+  padding: var(--spacing-sm) var(--spacing-md);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  font-size: 0.95rem;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+}
+
+.student-inputs input:focus {
+  outline: none;
+  border-color: var(--primary-color);
+}
+
+.no-students {
+  text-align: center;
+  color: var(--text-secondary);
+  font-style: italic;
+  padding: var(--spacing-lg);
+  background: var(--bg-secondary);
+  border-radius: var(--radius-md);
+  border: 1px dashed var(--border-color);
 }
 
 .form-actions {
@@ -116,18 +163,37 @@
   margin-top: var(--spacing-xl);
   padding-top: var(--spacing-lg);
   border-top: 1px solid var(--border-color);
+  flex-wrap: wrap;
 }
 
 @media (max-width: 768px) {
-  .form-grid {
-    grid-template-columns: 1fr;
+  .create-lesson-page {
+    padding: var(--spacing-md);
   }
 
   .page-title {
     font-size: 1.5rem;
   }
 
-  .student-input-group {
+  .section-header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .student-item {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .student-inputs {
+    flex-direction: column;
+  }
+
+  .student-inputs input {
+    min-width: auto;
+  }
+
+  .form-actions {
     flex-direction: column;
   }
 }

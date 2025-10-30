@@ -38,8 +38,36 @@ export const paymentService = {
     return response.data
   },
 
+  // Get student cost summary (lessons cost vs paid amount)
+  getStudentCostSummary: async (studentName, month = null, year = null) => {
+    const params = {}
+    if (month !== null && month !== undefined) {
+      params.month = month
+    }
+    if (year !== null && year !== undefined) {
+      params.year = year
+    }
+    
+    const response = await api.get(`/payments/student/${studentName}/cost-summary`, { params })
+    return response.data
+  },
+
   // Delete a payment
   deletePayment: async (paymentId) => {
     await api.delete(`/payments/${paymentId}`)
+  },
+
+  // Get payment status for all students (dashboard endpoint)
+  getStudentsPaymentStatus: async (month = null, year = null) => {
+    const params = {}
+    if (month !== null && month !== undefined) {
+      params.month = month
+    }
+    if (year !== null && year !== undefined) {
+      params.year = year
+    }
+    
+    const response = await api.get('/dashboard/students/payment-status', { params })
+    return response.data
   }
 }

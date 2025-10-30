@@ -151,22 +151,6 @@ const DashboardPageMobile = () => {
 
       {/* Overview Cards */}
       <div className="overview-cards">
-        <div className="stat-card stat-card-users">
-          <div className="stat-icon">👥</div>
-          <div className="stat-info">
-            <h3 className="stat-label">إجمالي المستخدمين</h3>
-            <p className="stat-value">{stats.totalUsers}</p>
-          </div>
-        </div>
-
-        <div className="stat-card stat-card-revenue">
-          <div className="stat-icon">💰</div>
-          <div className="stat-info">
-            <h3 className="stat-label">إجمالي الإيرادات</h3>
-            <p className="stat-value">${stats.totalRevenue.toFixed(2)}</p>
-          </div>
-        </div>
-
         <div className="stat-card stat-card-courses">
           <div className="stat-icon">📚</div>
           <div className="stat-info">

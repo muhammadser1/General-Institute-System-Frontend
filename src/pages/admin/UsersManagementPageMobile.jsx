@@ -9,6 +9,7 @@ import '../../styles/pages/admin/UsersManagementPage.css'
 
 const UsersManagementPageMobile = () => {
   const [users, setUsers] = useState([])
+  const [allUsers, setAllUsers] = useState([]) // For stats
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
@@ -72,12 +73,21 @@ const UsersManagementPageMobile = () => {
       }
       
       setUsers(usersToSet)
+      setAllUsers(usersToSet) // Store for stats
       setTotalUsers(totalToSet)
     } catch (err) {
       setError(err.response?.data?.detail || 'فشل تحميل المستخدمين')
     } finally {
       setLoading(false)
     }
+  }
+
+  // Calculate stats from all users
+  const stats = {
+    total: allUsers.length,
+    active: allUsers.filter(u => u.status === 'active').length,
+    teachers: allUsers.filter(u => u.role === 'teacher').length,
+    admins: allUsers.filter(u => u.role === 'admin').length
   }
 
   useEffect(() => {
@@ -185,8 +195,15 @@ const UsersManagementPageMobile = () => {
   const handleResetPassword = async (e) => {
     e.preventDefault()
     setModalError('')
+    
+    // Validate password is not empty
+    if (!formData.password || formData.password.trim() === '') {
+      setModalError('كلمة المرور مطلوبة')
+      return
+    }
+    
     try {
-      await adminService.resetPassword(selectedUser.id, { new_password: formData.password })
+      await adminService.resetPassword(selectedUser.id, formData.password)
       setSuccess('تم تغيير كلمة المرور بنجاح')
       setShowPasswordModal(false)
       resetForm()
@@ -268,6 +285,38 @@ const UsersManagementPageMobile = () => {
       {error && (
         <Alert type="error" message={error} onClose={() => setError('')} />
       )}
+
+      {/* Stats Summary */}
+      <div className="users-stats">
+        <div className="stat-card">
+          <div className="stat-icon">👥</div>
+          <div className="stat-content">
+            <h3 className="stat-value">{stats.total}</h3>
+            <p className="stat-label">إجمالي المستخدمين</p>
+          </div>
+        </div>
+        <div className="stat-card">
+          <div className="stat-icon">✅</div>
+          <div className="stat-content">
+            <h3 className="stat-value">{stats.active}</h3>
+            <p className="stat-label">مستخدمين نشطين</p>
+          </div>
+        </div>
+        <div className="stat-card">
+          <div className="stat-icon">👨‍🏫</div>
+          <div className="stat-content">
+            <h3 className="stat-value">{stats.teachers}</h3>
+            <p className="stat-label">معلمين</p>
+          </div>
+        </div>
+        <div className="stat-card">
+          <div className="stat-icon">👨‍💼</div>
+          <div className="stat-content">
+            <h3 className="stat-value">{stats.admins}</h3>
+            <p className="stat-label">مدراء</p>
+          </div>
+        </div>
+      </div>
 
       {/* Filters */}
       <div className="users-filters">

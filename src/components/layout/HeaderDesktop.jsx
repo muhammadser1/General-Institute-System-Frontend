@@ -16,27 +16,18 @@ const HeaderDesktop = () => {
       <div className="header-container">
         <div className="header-brand">
           <Link to="/" className="header-logo">
-            <img src="/images/logo.png" alt="Logo" className="logo-img" />
+            <img src="/images/logo.jpeg" alt="Logo" className="logo-img" />
             <span className="logo-text">Institute System</span>
           </Link>
         </div>
 
-        <nav className="header-nav">
-          <Link to="/dashboard" className="nav-link">Dashboard</Link>
-          <Link to="/lessons" className="nav-link">Lessons</Link>
-          {user?.role === 'admin' && (
-            <Link to="/admin/dashboard" className="nav-link">Admin</Link>
-          )}
-        </nav>
 
         <div className="header-actions">
-          <div className="user-menu">
-            <span className="user-name">{user?.full_name || user?.username}</span>
-            <div className="user-dropdown">
-              <Link to="/profile" className="dropdown-item">Profile</Link>
-              <button onClick={handleLogout} className="dropdown-item">Logout</button>
-            </div>
-          </div>
+          <span className="user-name">{user?.full_name || user?.username}</span>
+          <button onClick={handleLogout} className="logout-btn">
+            <span className="logout-icon">🚪</span>
+            <span>تسجيل الخروج</span>
+          </button>
         </div>
       </div>
     </header>
