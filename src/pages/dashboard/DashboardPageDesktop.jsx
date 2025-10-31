@@ -1,15 +1,31 @@
 import { useState, useEffect } from 'react'
 import { lessonService } from '../../services/lessonService'
+import { studentService } from '../../services/studentService'
+import { useAddStudent } from '../../contexts/AddStudentContext'
 import Alert from '../../components/common/Alert'
 import Loading from '../../components/common/Loading'
+import Button from '../../components/common/Button'
+import Input from '../../components/common/Input'
+import Select from '../../components/common/Select'
+import Modal from '../../components/common/Modal'
 import '../../styles/pages/dashboard/DashboardPage.css'
 
 const DashboardPageDesktop = () => {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
+  const [success, setSuccess] = useState('')
   const [summary, setSummary] = useState(null)
   const [monthFilter, setMonthFilter] = useState('all')
   const [yearFilter, setYearFilter] = useState(new Date().getFullYear().toString())
+  
+  // Add Student Modal
+  const { showAddStudentModal, setShowAddStudentModal } = useAddStudent()
+  const [modalError, setModalError] = useState('')
+  const [studentFormData, setStudentFormData] = useState({
+    full_name: '',
+    education_level: 'middle',
+    notes: ''
+  })
 
   useEffect(() => {
     fetchDashboardData()
@@ -114,6 +130,39 @@ const DashboardPageDesktop = () => {
     }
   }
 
+  // Handle create student
+  const handleCreateStudent = async (e) => {
+    e.preventDefault()
+    setModalError('')
+    try {
+      await studentService.createStudent(studentFormData)
+      setSuccess('تم إضافة الطالب بنجاح')
+      setShowAddStudentModal(false)
+      resetStudentForm()
+    } catch (err) {
+      const errorDetail = err.response?.data?.detail
+      let errorMessage = 'فشل إضافة الطالب'
+      
+      if (Array.isArray(errorDetail)) {
+        errorMessage = errorDetail.map(e => e.msg || JSON.stringify(e)).join(', ')
+      } else if (typeof errorDetail === 'string') {
+        errorMessage = errorDetail
+      }
+      
+      setModalError(errorMessage)
+    }
+  }
+
+  // Reset student form
+  const resetStudentForm = () => {
+    setStudentFormData({
+      full_name: '',
+      education_level: 'middle',
+      notes: ''
+    })
+    setModalError('')
+  }
+
   if (loading) {
     return (
       <div className="dashboard-page dashboard-page-desktop">
@@ -129,9 +178,18 @@ const DashboardPageDesktop = () => {
   return (
     <div className="dashboard-page dashboard-page-desktop">
       <div className="dashboard-header">
-        <h1 className="dashboard-title">لوحة التحكم</h1>
-        <p className="dashboard-subtitle">نظرة عامة على دروسك وإحصائياتك</p>
+        <div>
+          <h1 className="dashboard-title">لوحة التحكم</h1>
+          <p className="dashboard-subtitle">نظرة عامة على دروسك وإحصائياتك</p>
+        </div>
+        <Button onClick={() => { resetStudentForm(); setShowAddStudentModal(true) }}>
+          + إضافة طالب جديد
+        </Button>
       </div>
+
+      {success && (
+        <Alert type="success" message={success} onClose={() => setSuccess('')} />
+      )}
 
       {error && (
         <Alert type="error" message={error} onClose={() => setError('')} />
@@ -266,6 +324,50 @@ const DashboardPageDesktop = () => {
           })}
         </div>
       </div>
+
+      {/* Add Student Modal */}
+      <Modal isOpen={showAddStudentModal} onClose={() => { setShowAddStudentModal(false); resetStudentForm() }} title="إضافة طالب جديد">
+        {modalError && <Alert type="error" message={modalError} />}
+        <form onSubmit={handleCreateStudent} className="students-form" style={{ marginTop: '1rem' }}>
+          <Input
+            name="full_name"
+            label="الاسم الكامل *"
+            value={studentFormData.full_name}
+            onChange={(e) => setStudentFormData({ ...studentFormData, full_name: e.target.value })}
+            required
+            placeholder="أدخل الاسم الكامل"
+          />
+          <Select
+            name="education_level"
+            label="المرحلة التعليمية"
+            value={studentFormData.education_level}
+            onChange={(e) => setStudentFormData({ ...studentFormData, education_level: e.target.value })}
+            options={[
+              { value: 'elementary', label: 'ابتدائي' },
+              { value: 'middle', label: 'إعدادي' },
+              { value: 'secondary', label: 'ثانوي' }
+            ]}
+          />
+          <div className="form-group">
+            <label>ملاحظات</label>
+            <textarea
+              name="notes"
+              value={studentFormData.notes}
+              onChange={(e) => setStudentFormData({ ...studentFormData, notes: e.target.value })}
+              placeholder="ملاحظات خاصة..."
+              rows="3"
+            />
+          </div>
+          <div className="form-actions">
+            <Button type="button" variant="secondary" onClick={() => { setShowAddStudentModal(false); resetStudentForm() }}>
+              إلغاء
+            </Button>
+            <Button type="submit" variant="primary">
+              إضافة
+            </Button>
+          </div>
+        </form>
+      </Modal>
 
     </div>
   )

@@ -45,6 +45,19 @@
   font-size: 0.95rem;
 }
 
+.sidebar-button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  text-align: left;
+  width: 100%;
+}
+
+.sidebar-button:hover {
+  background: var(--bg-tertiary);
+  color: var(--primary-color);
+}
+
 @media (max-width: 768px) {
   .sidebar {
     display: none;

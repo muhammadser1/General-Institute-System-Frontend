@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { lessonService } from '../../services/lessonService'
 import Alert from '../../components/common/Alert'
 import Button from '../../components/common/Button'
@@ -7,6 +8,7 @@ import Modal from '../../components/common/Modal'
 import '../../styles/pages/lessons/LessonsPage.css'
 
 const LessonsPageMobile = () => {
+  const navigate = useNavigate()
   const [lessons, setLessons] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
@@ -268,13 +270,21 @@ const LessonsPageMobile = () => {
                   <>
                     <button
                       className="action-btn action-btn-edit"
-                      onClick={() => window.location.href = `/lessons/${lesson.id}/edit`}
+                      onClick={(e) => {
+                        e.preventDefault()
+                        e.stopPropagation()
+                        navigate(`/lessons/${lesson.id}`)
+                      }}
                     >
                       تعديل
                     </button>
                     <button
                       className="action-btn action-btn-delete"
-                      onClick={() => openDeleteModal(lesson)}
+                      onClick={(e) => {
+                        e.preventDefault()
+                        e.stopPropagation()
+                        openDeleteModal(lesson)
+                      }}
                     >
                       حذف
                     </button>

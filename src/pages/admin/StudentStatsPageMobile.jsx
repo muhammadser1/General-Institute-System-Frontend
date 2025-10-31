@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useAuth } from '../../contexts/AuthContext'
+import { exportStudentStatsToPDF } from '../../utils/pdfExport'
+import Button from '../../components/common/Button'
 import '../../styles/pages/admin/StudentStatsPage.css'
 
 const StudentStatsPageMobile = () => {
@@ -106,6 +108,23 @@ const StudentStatsPageMobile = () => {
     <div className="overview-container">
       <header className="overview-header">
         <h1 className="title">نظرة عامة على النظام</h1>
+        {filteredStudents.length > 0 && (
+          <Button
+            onClick={async () => {
+              try {
+                await exportStudentStatsToPDF(filteredStudents, selectedMonth)
+              } catch (error) {
+                console.error('PDF export error:', error)
+                alert('فشل تصدير PDF: ' + error.message)
+              }
+            }}
+            variant="secondary"
+            size="small"
+            style={{ marginLeft: 'auto' }}
+          >
+            📄 PDF
+          </Button>
+        )}
       </header>
 
       <div className="filter-section">

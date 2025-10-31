@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { paymentService } from '../../services/paymentService'
+import { exportPaymentsToPDF } from '../../utils/pdfExport'
 import Button from '../../components/common/Button'
 import Input from '../../components/common/Input'
 import Select from '../../components/common/Select'
@@ -15,15 +16,17 @@ const PaymentsPageMobile = () => {
   const [error, setError] = useState(null)
   const [success, setSuccess] = useState(null)
   
-  // Filters
-  const [selectedMonth, setSelectedMonth] = useState(null)
-  const [selectedYear, setSelectedYear] = useState(null)
+  // Filters - Default to current month and year
+  const currentDate = new Date()
+  const [selectedMonth, setSelectedMonth] = useState(currentDate.getMonth() + 1)
+  const [selectedYear, setSelectedYear] = useState(currentDate.getFullYear())
   const [studentFilter, setStudentFilter] = useState('')
   
   // Summary
   const [totalPayments, setTotalPayments] = useState(0)
   const [totalAmount, setTotalAmount] = useState(0)
   const [studentTotal, setStudentTotal] = useState(null)
+  const [monthlyTotal, setMonthlyTotal] = useState(0) // Monthly total for selected student
   
   // Add Payment Modal
   const [showAddModal, setShowAddModal] = useState(false)
@@ -57,9 +60,23 @@ const PaymentsPageMobile = () => {
         )
       }
       
-      setPayments(data.payments || [])
+      const paymentsList = data.payments || []
+      setPayments(paymentsList)
       setTotalPayments(data.total_payments || 0)
       setTotalAmount(data.total_amount || 0)
+      
+      // Calculate monthly total for selected student if month/year is selected
+      if (studentFilter && selectedMonth && selectedYear) {
+        const currentMonthPayments = paymentsList.filter(payment => {
+          const paymentDate = new Date(payment.payment_date)
+          return paymentDate.getMonth() + 1 === selectedMonth && 
+                 paymentDate.getFullYear() === selectedYear
+        })
+        const monthlySum = currentMonthPayments.reduce((sum, p) => sum + parseFloat(p.amount || 0), 0)
+        setMonthlyTotal(monthlySum)
+      } else {
+        setMonthlyTotal(0)
+      }
     } catch (err) {
       // Handle different error response formats
       let errorMessage = 'Failed to fetch payments'
@@ -224,17 +241,50 @@ const PaymentsPageMobile = () => {
     label: (currentYear - 5 + i).toString()
   }))
 
+  // Handle PDF export
+  const handleExportPDF = async () => {
+    console.log('PDF button clicked!', { paymentsCount: payments.length })
+    try {
+      if (payments.length === 0) {
+        setError('No payments to export')
+        return
+      }
+      setLoading(true)
+      setError(null)
+      console.log('Calling exportPaymentsToPDF...')
+      await exportPaymentsToPDF(payments, studentFilter || null, selectedMonth, selectedYear)
+      console.log('exportPaymentsToPDF completed')
+      setSuccess('PDF exported successfully')
+      setLoading(false)
+    } catch (error) {
+      console.error('PDF export error:', error)
+      setError(error.message || 'Failed to export PDF. Please check the browser console for details.')
+      setLoading(false)
+    }
+  }
+
   return (
     <div className="payments-page payments-page-mobile">
       <div className="page-header">
         <h1 className="page-title">Payments</h1>
-        <Button
-          onClick={() => setShowAddModal(true)}
-          variant="primary"
-          size="small"
-        >
-          + Add
-        </Button>
+        <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+          {payments.length > 0 && (
+            <Button
+              onClick={handleExportPDF}
+              variant="secondary"
+              size="small"
+            >
+              📄 PDF
+            </Button>
+          )}
+          <Button
+            onClick={() => setShowAddModal(true)}
+            variant="primary"
+            size="small"
+          >
+            + Add
+          </Button>
+        </div>
       </div>
 
       {error && (
@@ -278,39 +328,53 @@ const PaymentsPageMobile = () => {
 
       {/* Summary Cards */}
       <div className="payments-summary">
-        <div className="summary-card">
-          <div className="summary-label">
-            {studentFilter ? 'Payments This Month' : 'Total Payments'}
-          </div>
-          <div className="summary-value">{totalPayments}</div>
-        </div>
-        <div className="summary-card">
-          <div className="summary-label">
-            {studentFilter ? 'Amount This Month' : 'Total Amount'}
-          </div>
-          <div className="summary-value">{formatCurrency(totalAmount)}</div>
-        </div>
-        {studentTotal && (
+        {!studentFilter ? (
           <>
-            <div className="summary-card" style={{ background: 'var(--primary-color)', color: 'white' }}>
-              <div className="summary-label" style={{ color: 'rgba(255,255,255,0.9)' }}>
-                Student Total (All Time)
-              </div>
-              <div className="summary-value" style={{ color: 'white' }}>
-                {studentTotal.total_payments}
-              </div>
+            <div className="summary-card">
+              <div className="summary-label">Total Payments</div>
+              <div className="summary-value">{totalPayments}</div>
             </div>
-            <div className="summary-card" style={{ background: 'var(--primary-color)', color: 'white' }}>
-              <div className="summary-label" style={{ color: 'rgba(255,255,255,0.9)' }}>
-                Student Total Amount (All Time)
+            <div className="summary-card">
+              <div className="summary-label">Total Amount</div>
+              <div className="summary-value">{formatCurrency(totalAmount)}</div>
+            </div>
+          </>
+        ) : (
+          <>
+            {/* Student-specific summary */}
+            {selectedMonth && selectedYear && (
+              <div className="summary-card" style={{ background: 'var(--success-color)', color: 'white' }}>
+                <div className="summary-label" style={{ color: 'rgba(255,255,255,0.9)' }}>
+                  Total for {new Date(selectedYear, selectedMonth - 1).toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
+                </div>
+                <div className="summary-value" style={{ color: 'white', fontSize: '1.5rem' }}>
+                  {formatCurrency(monthlyTotal)}
+                </div>
               </div>
-              <div className="summary-value" style={{ color: 'white' }}>
-                {formatCurrency(studentTotal.total_amount)}
+            )}
+            <div className="summary-card">
+              <div className="summary-label">
+                {selectedMonth && selectedYear ? 'Payments This Month' : 'Total Payments'}
               </div>
+              <div className="summary-value">{totalPayments}</div>
             </div>
           </>
         )}
       </div>
+
+      {/* Payment History Section */}
+      {studentFilter && (
+        <div style={{ marginBottom: '1.5rem', padding: '1rem', background: 'var(--bg-primary)', borderRadius: 'var(--radius-lg)', border: '1px solid var(--border-color)' }}>
+          <h2 style={{ marginBottom: '0.5rem', color: 'var(--text-primary)', fontSize: '1.1rem' }}>
+            📜 Payment History for {studentFilter}
+          </h2>
+          <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem' }}>
+            {selectedMonth && selectedYear 
+              ? `Showing payments for ${new Date(selectedYear, selectedMonth - 1).toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}`
+              : 'Showing all payments for this student'}
+          </p>
+        </div>
+      )}
 
       {/* Payments List */}
       {loading ? (
@@ -319,18 +383,23 @@ const PaymentsPageMobile = () => {
         </div>
       ) : payments.length === 0 ? (
         <div style={{ padding: '2rem', textAlign: 'center', color: 'var(--text-secondary)' }}>
-          No payments found for the selected period
+          {studentFilter ? `No payments found for ${studentFilter}` : 'No payments found for the selected period'}
         </div>
       ) : (
         <div className="payments-list">
-          {payments.map((payment) => (
+          {[...payments]
+            .sort((a, b) => new Date(b.payment_date) - new Date(a.payment_date)) // Sort by date, newest first
+            .map((payment, index) => (
             <Card key={payment.id} className="payment-card">
               <div className="payment-card-header">
                 <div>
-                  <div className="payment-student">{payment.student_name}</div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.25rem' }}>
+                    <span style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', fontWeight: 'bold' }}>#{index + 1}</span>
+                    <div className="payment-student">{payment.student_name}</div>
+                  </div>
                   <div className="payment-date">{formatDate(payment.payment_date)}</div>
                 </div>
-                <div className="payment-amount">{formatCurrency(payment.amount)}</div>
+                <div className="payment-amount" style={{ fontWeight: 'bold', color: 'var(--success-color)' }}>{formatCurrency(payment.amount)}</div>
               </div>
               {payment.notes && (
                 <div className="payment-notes">

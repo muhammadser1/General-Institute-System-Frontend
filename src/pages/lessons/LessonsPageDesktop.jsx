@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../../contexts/AuthContext'
 import { lessonService } from '../../services/lessonService'
 import { adminService } from '../../services/adminService'
@@ -10,6 +11,7 @@ import '../../styles/pages/lessons/LessonsPage.css'
 
 const LessonsPageDesktop = () => {
   const { user } = useAuth()
+  const navigate = useNavigate()
   const isAdmin = user?.role === 'admin'
   
   const [lessons, setLessons] = useState([])
@@ -356,13 +358,21 @@ const LessonsPageDesktop = () => {
                           <>
                             <button
                               className="action-btn action-btn-edit"
-                              onClick={() => window.location.href = `/lessons/${lesson.id}/edit`}
+                              onClick={(e) => {
+                                e.preventDefault()
+                                e.stopPropagation()
+                                navigate(`/lessons/${lesson.id}`)
+                              }}
                             >
                               تعديل
                             </button>
                             <button
                               className="action-btn action-btn-delete"
-                              onClick={() => openDeleteModal(lesson)}
+                              onClick={(e) => {
+                                e.preventDefault()
+                                e.stopPropagation()
+                                openDeleteModal(lesson)
+                              }}
                             >
                               حذف
                             </button>

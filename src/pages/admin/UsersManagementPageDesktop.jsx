@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { adminService } from '../../services/adminService'
+import { exportUsersToPDF } from '../../utils/pdfExport'
 import Alert from '../../components/common/Alert'
 import Button from '../../components/common/Button'
 import Input from '../../components/common/Input'
@@ -273,6 +274,21 @@ const UsersManagementPageDesktop = () => {
     <div className="users-management-page users-management-page-desktop">
       <div className="page-header">
         <h1 className="page-title">إدارة المستخدمين</h1>
+        {filteredUsers.length > 0 && (
+          <Button
+            onClick={async () => {
+              try {
+                await exportUsersToPDF(filteredUsers)
+              } catch (error) {
+                console.error('PDF export error:', error)
+                alert('فشل تصدير PDF: ' + error.message)
+              }
+            }}
+            variant="secondary"
+          >
+            📄 تحميل PDF
+          </Button>
+        )}
         <Button onClick={() => { resetForm(); setShowCreateModal(true) }}>
           + إضافة مستخدم جديد
         </Button>

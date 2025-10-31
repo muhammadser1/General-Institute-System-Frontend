@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useAuth } from '../../contexts/AuthContext'
+import { exportStudentStatsToPDF } from '../../utils/pdfExport'
+import Button from '../../components/common/Button'
 import '../../styles/pages/admin/StudentStatsPage.css'
 
 const StudentStatsPageDesktop = () => {
@@ -106,6 +108,22 @@ const StudentStatsPageDesktop = () => {
     <div className="overview-container">
       <header className="overview-header">
         <h1 className="title">نظرة عامة على النظام</h1>
+        {filteredStudents.length > 0 && (
+          <Button
+            onClick={async () => {
+              try {
+                await exportStudentStatsToPDF(filteredStudents, selectedMonth)
+              } catch (error) {
+                console.error('PDF export error:', error)
+                alert('فشل تصدير PDF: ' + error.message)
+              }
+            }}
+            variant="secondary"
+            style={{ marginLeft: 'auto' }}
+          >
+            📄 تحميل PDF
+          </Button>
+        )}
       </header>
 
       <div className="filter-section">
@@ -150,11 +168,11 @@ const StudentStatsPageDesktop = () => {
             <table className="stats-table">
               <thead>
                 <tr>
-                  <th>المستوى التعليمي</th>
-                  <th>إجمالي الساعات</th>
-                  <th>ساعات دروس المجموعات</th>
-                  <th>ساعات الدروس الفردية</th>
                   <th>الطالب</th>
+                  <th>ساعات الدروس الفردية</th>
+                  <th>ساعات دروس المجموعات</th>
+                  <th>إجمالي الساعات</th>
+                  <th>المستوى التعليمي</th>
                 </tr>
               </thead>
               <tbody>
@@ -163,11 +181,11 @@ const StudentStatsPageDesktop = () => {
                 ) : (
                   filteredStudents.map((student, index) => (
                     <tr key={student.student_id || index}>
-                      <td>{student.education_level}</td>
-                      <td>{student.total_hours || (student.total_individual_hours + student.total_group_hours)}</td>
-                      <td>{student.total_group_hours}</td>
-                      <td>{student.total_individual_hours}</td>
                       <td>{student.student_name}</td>
+                      <td>{student.total_individual_hours}</td>
+                      <td>{student.total_group_hours}</td>
+                      <td>{student.total_hours || (student.total_individual_hours + student.total_group_hours)}</td>
+                      <td>{student.education_level}</td>
                     </tr>
                   ))
                 )}

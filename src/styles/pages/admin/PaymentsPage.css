@@ -72,7 +72,7 @@
 
 .payments-table th {
   padding: var(--spacing-md);
-  text-align: left;
+  text-align: center;
   font-weight: 700;
   color: var(--text-primary);
   font-size: 0.875rem;
@@ -83,6 +83,7 @@
   padding: var(--spacing-md);
   border-top: 1px solid var(--border-color);
   color: var(--text-primary);
+  text-align: center;
 }
 
 .payments-table tbody tr:hover {

@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { studentService } from '../../services/studentService'
+import { exportStudentsToPDF } from '../../utils/pdfExport'
 import Alert from '../../components/common/Alert'
 import Button from '../../components/common/Button'
 import Input from '../../components/common/Input'
@@ -155,9 +156,26 @@ const StudentsManagementPageDesktop = () => {
     <div className="students-management-page students-page-desktop">
       <div className="page-header">
         <h1 className="page-title">إدارة الطلاب</h1>
-        <Button onClick={() => { resetForm(); setShowCreateModal(true) }}>
-          + إضافة طالب جديد
-        </Button>
+        <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+          {filteredStudents.length > 0 && (
+            <Button
+              onClick={async () => {
+                try {
+                  await exportStudentsToPDF(filteredStudents)
+                } catch (error) {
+                  console.error('PDF export error:', error)
+                  alert('فشل تصدير PDF: ' + error.message)
+                }
+              }}
+              variant="secondary"
+            >
+              📄 تحميل PDF
+            </Button>
+          )}
+          <Button onClick={() => { resetForm(); setShowCreateModal(true) }}>
+            + إضافة طالب جديد
+          </Button>
+        </div>
       </div>
 
       {success && (

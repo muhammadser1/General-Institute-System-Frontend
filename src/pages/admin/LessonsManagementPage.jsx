@@ -1,5 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { useAuth } from '../../contexts/AuthContext'
+import { exportLessonsToPDF } from '../../utils/pdfExport'
+import Button from '../../components/common/Button'
 import '../../styles/pages/admin/LessonsManagementPage.css'
 import api from '../../services/api'
 
@@ -8,6 +10,7 @@ const LessonsManagementPage = () => {
   const [activeTab, setActiveTab] = useState('all')
   const [lessons, setLessons] = useState([])
   const [pendingLessons, setPendingLessons] = useState([])
+  const [rejectedLessons, setRejectedLessons] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
   const [searchQuery, setSearchQuery] = useState('')
@@ -97,13 +100,38 @@ const LessonsManagementPage = () => {
 
       console.log('📊 Filtered lessons count:', apiLessons.length)
 
-      const completedLessons = apiLessons.filter(lesson => lesson.status === 'completed' || lesson.status === 'approved')
-      const pendingLessonsData = apiLessons.filter(lesson => lesson.status !== 'completed' && lesson.status !== 'approved')
+      // Filter out cancelled lessons (case-insensitive) and separate rejected lessons
+      const nonCancelledLessons = apiLessons.filter(lesson => {
+        const status = (lesson.status || '').toLowerCase()
+        return status !== 'cancelled'
+      })
 
-      console.log('📊 Completed lessons:', completedLessons.length, 'Pending lessons:', pendingLessonsData.length)
+      // Separate rejected lessons
+      const rejectedLessonsData = nonCancelledLessons.filter(lesson => {
+        const status = (lesson.status || '').toLowerCase()
+        return status === 'rejected'
+      })
+
+      // Filter out rejected lessons from main lists
+      const nonRejectedLessons = nonCancelledLessons.filter(lesson => {
+        const status = (lesson.status || '').toLowerCase()
+        return status !== 'rejected'
+      })
+
+      const completedLessons = nonRejectedLessons.filter(lesson => {
+        const status = (lesson.status || '').toLowerCase()
+        return status === 'completed' || status === 'approved'
+      })
+      const pendingLessonsData = nonRejectedLessons.filter(lesson => {
+        const status = (lesson.status || '').toLowerCase()
+        return status !== 'completed' && status !== 'approved'
+      })
+
+      console.log('📊 Completed lessons:', completedLessons.length, 'Pending lessons:', pendingLessonsData.length, 'Rejected lessons:', rejectedLessonsData.length)
 
       setLessons(completedLessons)
       setPendingLessons(pendingLessonsData)
+      setRejectedLessons(rejectedLessonsData)
     } catch (error) {
       console.error('❌ Error fetching lessons:', error)
       setError('حدث خطأ أثناء جلب بيانات الدروس.')
@@ -119,6 +147,12 @@ const LessonsManagementPage = () => {
   )
 
   const filteredPendingLessons = pendingLessons.filter((lesson) =>
+    lesson.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    lesson.teacher_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    lesson.student_name?.toLowerCase().includes(searchQuery.toLowerCase())
+  )
+
+  const filteredRejectedLessons = rejectedLessons.filter((lesson) =>
     lesson.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
     lesson.teacher_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
     lesson.student_name?.toLowerCase().includes(searchQuery.toLowerCase())
@@ -200,6 +234,53 @@ const LessonsManagementPage = () => {
     <div className="overview-container">
       <header className="overview-header">
         <h1 className="title">إدارة الدروس</h1>
+        <div style={{ display: 'flex', gap: '1rem', marginLeft: 'auto' }}>
+          {activeTab === 'all' && filteredLessons.length > 0 && (
+            <Button
+              onClick={async () => {
+                try {
+                  await exportLessonsToPDF(filteredLessons, 'all', selectedMonth)
+                } catch (error) {
+                  console.error('PDF export error:', error)
+                  alert('فشل تصدير PDF: ' + error.message)
+                }
+              }}
+              variant="secondary"
+            >
+              📄 تحميل PDF
+            </Button>
+          )}
+          {activeTab === 'pending' && filteredPendingLessons.length > 0 && (
+            <Button
+              onClick={async () => {
+                try {
+                  await exportLessonsToPDF(filteredPendingLessons, 'pending', selectedMonth)
+                } catch (error) {
+                  console.error('PDF export error:', error)
+                  alert('فشل تصدير PDF: ' + error.message)
+                }
+              }}
+              variant="secondary"
+            >
+              📄 تحميل PDF
+            </Button>
+          )}
+          {activeTab === 'rejected' && filteredRejectedLessons.length > 0 && (
+            <Button
+              onClick={async () => {
+                try {
+                  await exportLessonsToPDF(filteredRejectedLessons, 'rejected', selectedMonth)
+                } catch (error) {
+                  console.error('PDF export error:', error)
+                  alert('فشل تصدير PDF: ' + error.message)
+                }
+              }}
+              variant="secondary"
+            >
+              📄 تحميل PDF
+            </Button>
+          )}
+        </div>
       </header>
 
       <div className="filter-section">
@@ -244,6 +325,12 @@ const LessonsManagementPage = () => {
           onClick={() => setActiveTab('pending')}
         >
           الدروس المعلقة ({pendingLessons.length})
+        </button>
+        <button
+          className={`tab-button ${activeTab === 'rejected' ? 'active' : ''}`}
+          onClick={() => setActiveTab('rejected')}
+        >
+          الدروس المرفوضة ({rejectedLessons.length})
         </button>
       </div>
 
@@ -359,6 +446,63 @@ const LessonsManagementPage = () => {
                         </td>
                       </tr>
                     ))
+                  )}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Rejected Lessons Tab */}
+      {activeTab === 'rejected' && (
+        <div className="stats-section">
+          <h2>الدروس المرفوضة</h2>
+          {loading ? (
+            <p>جارٍ تحميل الدروس المرفوضة...</p>
+          ) : error ? (
+            <p className="error">{error}</p>
+          ) : (
+            <div className="table-wrapper">
+              <table className="stats-table">
+                <thead>
+                  <tr>
+                    <th>التاريخ</th>
+                    <th>الوقت</th>
+                    <th>عنوان الدرس</th>
+                    <th>المعلم</th>
+                    <th>الطالب</th>
+                    <th>النوع</th>
+                    <th>المستوى</th>
+                    <th>المدة (ساعة)</th>
+                    <th>الحالة</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {filteredRejectedLessons.length === 0 ? (
+                    <tr><td colSpan="9">لا توجد دروس مرفوضة</td></tr>
+                  ) : (
+                    filteredRejectedLessons.map((lesson) => {
+                      const statusLabel = 'مرفوض'
+                      const statusClass = 'rejected'
+                      return (
+                        <tr key={lesson.id}>
+                          <td>{lesson.date}</td>
+                          <td>{lesson.time}</td>
+                          <td>{lesson.title}</td>
+                          <td>{lesson.teacher_name}</td>
+                          <td>{lesson.student_name}</td>
+                          <td>{lesson.lesson_type === 'individual' ? 'فردي' : 'جماعي'}</td>
+                          <td>{lesson.education_level}</td>
+                          <td>{lesson.duration}</td>
+                          <td>
+                            <span className={`status-badge ${statusClass}`}>
+                              {statusLabel}
+                            </span>
+                          </td>
+                        </tr>
+                      )
+                    })
                   )}
                 </tbody>
               </table>

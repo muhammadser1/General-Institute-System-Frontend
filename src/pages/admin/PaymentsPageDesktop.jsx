@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { paymentService } from '../../services/paymentService'
+import { exportPaymentsToPDF } from '../../utils/pdfExport'
 import Button from '../../components/common/Button'
 import Input from '../../components/common/Input'
 import Select from '../../components/common/Select'
@@ -14,15 +15,17 @@ const PaymentsPageDesktop = () => {
   const [error, setError] = useState(null)
   const [success, setSuccess] = useState(null)
   
-  // Filters
-  const [selectedMonth, setSelectedMonth] = useState(null)
-  const [selectedYear, setSelectedYear] = useState(null)
+  // Filters - Default to current month and year
+  const currentDate = new Date()
+  const [selectedMonth, setSelectedMonth] = useState(currentDate.getMonth() + 1)
+  const [selectedYear, setSelectedYear] = useState(currentDate.getFullYear())
   const [studentFilter, setStudentFilter] = useState('')
   
   // Summary
   const [totalPayments, setTotalPayments] = useState(0)
   const [totalAmount, setTotalAmount] = useState(0)
   const [studentTotal, setStudentTotal] = useState(null)
+  const [monthlyTotal, setMonthlyTotal] = useState(0) // Monthly total for selected student
   
   // Add Payment Modal
   const [showAddModal, setShowAddModal] = useState(false)
@@ -56,9 +59,23 @@ const PaymentsPageDesktop = () => {
         )
       }
       
-      setPayments(data.payments || [])
+      const paymentsList = data.payments || []
+      setPayments(paymentsList)
       setTotalPayments(data.total_payments || 0)
       setTotalAmount(data.total_amount || 0)
+      
+      // Calculate monthly total for selected student if month/year is selected
+      if (studentFilter && selectedMonth && selectedYear) {
+        const currentMonthPayments = paymentsList.filter(payment => {
+          const paymentDate = new Date(payment.payment_date)
+          return paymentDate.getMonth() + 1 === selectedMonth && 
+                 paymentDate.getFullYear() === selectedYear
+        })
+        const monthlySum = currentMonthPayments.reduce((sum, p) => sum + parseFloat(p.amount || 0), 0)
+        setMonthlyTotal(monthlySum)
+      } else {
+        setMonthlyTotal(0)
+      }
     } catch (err) {
       // Handle different error response formats
       let errorMessage = 'Failed to fetch payments'
@@ -223,16 +240,48 @@ const PaymentsPageDesktop = () => {
     label: (currentYear - 5 + i).toString()
   }))
 
+  // Handle PDF export
+  const handleExportPDF = async () => {
+    console.log('PDF button clicked!', { paymentsCount: payments.length })
+    try {
+      if (payments.length === 0) {
+        setError('No payments to export')
+        return
+      }
+      setLoading(true)
+      setError(null)
+      console.log('Calling exportPaymentsToPDF...')
+      await exportPaymentsToPDF(payments, studentFilter || null, selectedMonth, selectedYear)
+      console.log('exportPaymentsToPDF completed')
+      setSuccess('PDF exported successfully')
+      setLoading(false)
+    } catch (error) {
+      console.error('PDF export error:', error)
+      setError(error.message || 'Failed to export PDF. Please check the browser console for details.')
+      setLoading(false)
+    }
+  }
+
   return (
     <div className="payments-page payments-page-desktop">
       <div className="page-header">
         <h1 className="page-title">Payment Management</h1>
-        <Button
-          onClick={() => setShowAddModal(true)}
-          variant="primary"
-        >
-          + Add Payment
-        </Button>
+        <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+          {payments.length > 0 && (
+            <Button
+              onClick={handleExportPDF}
+              variant="secondary"
+            >
+              📄 Download PDF
+            </Button>
+          )}
+          <Button
+            onClick={() => setShowAddModal(true)}
+            variant="primary"
+          >
+            + Add Payment
+          </Button>
+        </div>
       </div>
 
       {error && (
@@ -276,39 +325,53 @@ const PaymentsPageDesktop = () => {
 
       {/* Summary Cards */}
       <div className="payments-summary">
-        <div className="summary-card">
-          <div className="summary-label">
-            {studentFilter ? 'Payments This Month' : 'Total Payments'}
-          </div>
-          <div className="summary-value">{totalPayments}</div>
-        </div>
-        <div className="summary-card">
-          <div className="summary-label">
-            {studentFilter ? 'Amount This Month' : 'Total Amount'}
-          </div>
-          <div className="summary-value">{formatCurrency(totalAmount)}</div>
-        </div>
-        {studentTotal && (
+        {!studentFilter ? (
           <>
-            <div className="summary-card" style={{ background: 'var(--primary-color)', color: 'white' }}>
-              <div className="summary-label" style={{ color: 'rgba(255,255,255,0.9)' }}>
-                Student Total (All Time)
-              </div>
-              <div className="summary-value" style={{ color: 'white' }}>
-                {studentTotal.total_payments}
-              </div>
+            <div className="summary-card">
+              <div className="summary-label">Total Payments</div>
+              <div className="summary-value">{totalPayments}</div>
             </div>
-            <div className="summary-card" style={{ background: 'var(--primary-color)', color: 'white' }}>
-              <div className="summary-label" style={{ color: 'rgba(255,255,255,0.9)' }}>
-                Student Total Amount (All Time)
+            <div className="summary-card">
+              <div className="summary-label">Total Amount</div>
+              <div className="summary-value">{formatCurrency(totalAmount)}</div>
+            </div>
+          </>
+        ) : (
+          <>
+            {/* Student-specific summary */}
+            {selectedMonth && selectedYear && (
+              <div className="summary-card" style={{ background: 'var(--success-color)', color: 'white' }}>
+                <div className="summary-label" style={{ color: 'rgba(255,255,255,0.9)' }}>
+                  Total for {new Date(selectedYear, selectedMonth - 1).toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
+                </div>
+                <div className="summary-value" style={{ color: 'white', fontSize: '2rem' }}>
+                  {formatCurrency(monthlyTotal)}
+                </div>
               </div>
-              <div className="summary-value" style={{ color: 'white' }}>
-                {formatCurrency(studentTotal.total_amount)}
+            )}
+            <div className="summary-card">
+              <div className="summary-label">
+                {selectedMonth && selectedYear ? 'Payments This Month' : 'Total Payments'}
               </div>
+              <div className="summary-value">{totalPayments}</div>
             </div>
           </>
         )}
       </div>
+
+      {/* Payment History Section */}
+      {studentFilter && (
+        <div style={{ marginBottom: '2rem', padding: '1.5rem', background: 'var(--bg-primary)', borderRadius: 'var(--radius-lg)', border: '1px solid var(--border-color)' }}>
+          <h2 style={{ marginBottom: '1rem', color: 'var(--text-primary)' }}>
+            📜 Payment History for {studentFilter}
+          </h2>
+          <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem' }}>
+            {selectedMonth && selectedYear 
+              ? `Showing payments for ${new Date(selectedYear, selectedMonth - 1).toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}`
+              : 'Showing all payments for this student'}
+          </p>
+        </div>
+      )}
 
       {/* Payments Table */}
       <div className="payments-table-container">
@@ -318,12 +381,13 @@ const PaymentsPageDesktop = () => {
           </div>
         ) : payments.length === 0 ? (
           <div style={{ padding: '2rem', textAlign: 'center', color: 'var(--text-secondary)' }}>
-            No payments found for the selected period
+            {studentFilter ? `No payments found for ${studentFilter}` : 'No payments found for the selected period'}
           </div>
         ) : (
           <table className="payments-table">
             <thead>
               <tr>
+                <th>#</th>
                 <th>Date</th>
                 <th>Student Name</th>
                 <th>Amount</th>
@@ -332,11 +396,14 @@ const PaymentsPageDesktop = () => {
               </tr>
             </thead>
             <tbody>
-              {payments.map((payment) => (
+              {[...payments]
+                .sort((a, b) => new Date(b.payment_date) - new Date(a.payment_date)) // Sort by date, newest first
+                .map((payment, index) => (
                 <tr key={payment.id}>
+                  <td style={{ color: 'var(--text-secondary)', fontWeight: 'bold' }}>{index + 1}</td>
                   <td>{formatDate(payment.payment_date)}</td>
                   <td>{payment.student_name}</td>
-                  <td>{formatCurrency(payment.amount)}</td>
+                  <td style={{ fontWeight: 'bold', color: 'var(--success-color)', textAlign: 'center' }}>{formatCurrency(payment.amount)}</td>
                   <td>{payment.notes || '-'}</td>
                   <td>
                     <Button

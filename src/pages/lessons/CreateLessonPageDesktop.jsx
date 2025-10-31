@@ -14,7 +14,8 @@ const CreateLessonPageDesktop = () => {
   const [success, setSuccess] = useState('')
   
   // API data
-  const [availableStudents, setAvailableStudents] = useState([])
+  const [allStudents, setAllStudents] = useState([]) // Store all students with education_level
+  const [availableStudents, setAvailableStudents] = useState([]) // Filtered students
   const [availableSubjects, setAvailableSubjects] = useState([])
   const [loadingData, setLoadingData] = useState(true)
   
@@ -50,11 +51,15 @@ const CreateLessonPageDesktop = () => {
         // Fetch students
         const studentsResponse = await studentService.getAllStudents({ include_inactive: false })
         const students = studentsResponse.students || []
-        setAvailableStudents(students.map(s => ({
+        const mappedStudents = students.map(s => ({
           id: s.id,
           name: s.full_name,
-          email: s.email || ''
-        })))
+          email: s.email || '',
+          education_level: s.education_level || null
+        }))
+        setAllStudents(mappedStudents)
+        // Initially show all students
+        setAvailableStudents(mappedStudents)
 
         // Fetch pricing to get subjects
         const pricingResponse = await pricingService.getAllPricing({ include_inactive: false })
@@ -137,6 +142,18 @@ const CreateLessonPageDesktop = () => {
     }
   }
 
+  // Filter students based on education level
+  useEffect(() => {
+    if (formData.education_level) {
+      const filtered = allStudents.filter(s => 
+        !s.education_level || s.education_level === formData.education_level
+      )
+      setAvailableStudents(filtered)
+    } else {
+      setAvailableStudents(allStudents)
+    }
+  }, [formData.education_level, allStudents])
+
   // Handle input changes
   const handleInputChange = (e) => {
     const { name, value } = e.target
@@ -187,17 +204,32 @@ const CreateLessonPageDesktop = () => {
 
   // Handle student selection
   const handleStudentSelection = (index, studentId) => {
-    const selectedStudent = availableStudents.find(s => s.id === studentId)
-    setFormData(prev => ({
-      ...prev,
-      students: prev.students.map((student, i) => 
-        i === index ? { 
-          student_id: selectedStudent ? selectedStudent.id : '',
-          student_name: selectedStudent ? selectedStudent.name : '',
-          student_email: selectedStudent ? selectedStudent.email || '' : ''
-        } : student
-      )
-    }))
+    const selectedStudent = allStudents.find(s => s.id === studentId)
+    if (selectedStudent && selectedStudent.education_level) {
+      // Auto-update education level to match selected student
+      setFormData(prev => ({
+        ...prev,
+        education_level: selectedStudent.education_level,
+        students: prev.students.map((student, i) => 
+          i === index ? { 
+            student_id: selectedStudent.id,
+            student_name: selectedStudent.name,
+            student_email: selectedStudent.email || ''
+          } : student
+        )
+      }))
+    } else {
+      setFormData(prev => ({
+        ...prev,
+        students: prev.students.map((student, i) => 
+          i === index ? { 
+            student_id: selectedStudent ? selectedStudent.id : '',
+            student_name: selectedStudent ? selectedStudent.name : '',
+            student_email: selectedStudent ? selectedStudent.email || '' : ''
+          } : student
+        )
+      }))
+    }
   }
 
   return (

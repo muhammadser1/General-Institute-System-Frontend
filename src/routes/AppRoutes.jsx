@@ -88,10 +88,11 @@ function AppRoutes() {
         <Route path="/admin/dashboard" element={<DashboardPage />} />
         <Route path="/admin/users" element={<UsersManagementPage />} />
         <Route path="/admin/students" element={<StudentsManagementPage />} />
-             <Route path="/admin/teacher-stats" element={<TeacherStatsPage />} />
-             <Route path="/admin/student-stats" element={<StudentStatsPage />} />
-             <Route path="/admin/lessons" element={<LessonsManagementPage />} />
-             <Route path="/admin/earnings/:teacherId" element={<TeacherEarningsPage />} />
+        <Route path="/admin/lessons" element={<LessonsManagementPage />} />
+        <Route path="/admin/payments" element={<PaymentsPage />} />
+        <Route path="/admin/teacher-stats" element={<TeacherStatsPage />} />
+        <Route path="/admin/student-stats" element={<StudentStatsPage />} />
+        <Route path="/admin/earnings/:teacherId" element={<TeacherEarningsPage />} />
       </Route>
 
       {/* Catch all - redirect to home */}
