@@ -169,7 +169,7 @@ const LessonsManagementPage = () => {
     try {
       console.log(`✅ Approving lesson: ${lessonId}`)
       
-      const response = await fetch(`http://127.0.0.1:8000/api/v1/lessons/admin/approve/${lessonId}`, {
+      const response = await fetch(`https://general-institute-system-backend.onrender.com/api/v1/lessons/admin/approve/${lessonId}`, {
         method: 'PUT',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -207,7 +207,7 @@ const LessonsManagementPage = () => {
     try {
       console.log(`❌ Rejecting lesson: ${lessonId}`)
       
-      const response = await fetch(`http://127.0.0.1:8000/api/v1/lessons/admin/reject/${lessonId}`, {
+      const response = await fetch(`https://general-institute-system-backend.onrender.com/api/v1/lessons/admin/reject/${lessonId}`, {
         method: 'PUT',
         headers: {
           'Authorization': `Bearer ${token}`,

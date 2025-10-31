@@ -55,7 +55,7 @@ const StudentStatsPageMobile = () => {
         params.append('education_level', levelMap[filterLevel] || filterLevel)
       }
 
-      const response = await fetch(`http://127.0.0.1:8000/api/v1/dashboard/stats/students-detailed?${params.toString()}`, {
+      const response = await fetch(`https://general-institute-system-backend.onrender.com/api/v1/dashboard/stats/students-detailed?${params.toString()}`, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
