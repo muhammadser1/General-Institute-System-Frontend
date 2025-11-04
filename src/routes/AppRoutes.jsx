@@ -90,6 +90,7 @@ function AppRoutes() {
         <Route path="/admin/students" element={<StudentsManagementPage />} />
         <Route path="/admin/lessons" element={<LessonsManagementPage />} />
         <Route path="/admin/payments" element={<PaymentsPage />} />
+        <Route path="/admin/pricing" element={<PricingPage />} />
         <Route path="/admin/teacher-stats" element={<TeacherStatsPage />} />
         <Route path="/admin/student-stats" element={<StudentStatsPage />} />
         <Route path="/admin/earnings/:teacherId" element={<TeacherEarningsPage />} />

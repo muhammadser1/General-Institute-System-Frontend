@@ -5,6 +5,7 @@ import Button from '../../components/common/Button'
 import Input from '../../components/common/Input'
 import Select from '../../components/common/Select'
 import Modal from '../../components/common/Modal'
+import { subjectLabels, labelToSubject, getSubjectOptions, DEFAULT_INDIVIDUAL_PRICE, DEFAULT_GROUP_PRICE } from '../../constants/subjects'
 import '../../styles/pages/admin/PricingPage.css'
 
 const PricingPageMobile = () => {
@@ -13,29 +14,7 @@ const PricingPageMobile = () => {
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
   const [modalError, setModalError] = useState('')
-  
-  // Subject mapping
-  const subjectLabels = {
-    'Arabic': 'عربي',
-    'Hebrew': 'عبراني',
-    'English': 'انجليزي',
-    'Math': 'رياضيات',
-    'History': 'تاريخ',
-    'Religion': 'دين',
-    'Geography': 'جغرافيا',
-    'Physics': 'فيزيا',
-    'Electronics': 'مخترونيكا',
-    'Civics': 'مدنيات',
-    'Chemistry': 'كيميا',
-    'Biology': 'بيولوجيا',
-    'Environment': 'بيئه',
-    'Technology': 'تكنولوجيا',
-    'Computer': 'حاسوب',
-    'Science': 'علوم',
-    'Adapted Teaching': 'הוראה מותאמת',
-    'Architecture': 'אדריכלות',
-    'Statistics': 'סטטיסטיקה'
-  }
+  const [isPopulating, setIsPopulating] = useState(false)
   
   // Function to get subject label
   const getSubjectLabel = (subject) => {
@@ -63,10 +42,10 @@ const PricingPageMobile = () => {
   
   // Form data
   const [formData, setFormData] = useState({
-    subject: '',
+    subject: '', // This will store the Arabic/Hebrew label
     education_level: 'elementary',
-    individual_price: '',
-    group_price: ''
+    individual_price: DEFAULT_INDIVIDUAL_PRICE.toString(),
+    group_price: DEFAULT_GROUP_PRICE.toString()
   })
 
   // Fetch pricing
@@ -92,7 +71,9 @@ const PricingPageMobile = () => {
   const filteredPricing = pricing.filter(item => {
     if (!searchQuery) return true
     const query = searchQuery.toLowerCase()
-    return item.subject.toLowerCase().includes(query)
+    const subjectLabel = getSubjectLabel(item.subject).toLowerCase()
+    const subjectEnglish = item.subject.toLowerCase()
+    return subjectLabel.includes(query) || subjectEnglish.includes(query)
   })
 
   // Handle create pricing
@@ -100,8 +81,15 @@ const PricingPageMobile = () => {
     e.preventDefault()
     setModalError('')
     try {
+      // Convert Arabic/Hebrew label to English for API
+      const englishSubject = labelToSubject[formData.subject]
+      if (!englishSubject) {
+        setModalError('يرجى اختيار مادة صحيحة')
+        return
+      }
+
       const data = {
-        subject: formData.subject,
+        subject: englishSubject, // Send English name to API
         education_level: formData.education_level,
         individual_price: parseFloat(formData.individual_price),
         group_price: parseFloat(formData.group_price)
@@ -174,8 +162,8 @@ const PricingPageMobile = () => {
     setFormData({
       subject: '',
       education_level: 'elementary',
-      individual_price: '',
-      group_price: ''
+      individual_price: DEFAULT_INDIVIDUAL_PRICE.toString(),
+      group_price: DEFAULT_GROUP_PRICE.toString()
     })
     setModalError('')
   }
@@ -183,11 +171,13 @@ const PricingPageMobile = () => {
   // Open edit modal
   const openEditModal = (item) => {
     setSelectedPricing(item)
+    // Convert English subject to Arabic/Hebrew label for display
+    const subjectLabel = getSubjectLabel(item.subject)
     setFormData({
-      subject: item.subject,
+      subject: subjectLabel,
       education_level: item.education_level,
-      individual_price: item.individual_price,
-      group_price: item.group_price
+      individual_price: item.individual_price.toString(),
+      group_price: item.group_price.toString()
     })
     setShowEditModal(true)
   }
@@ -198,13 +188,83 @@ const PricingPageMobile = () => {
     setShowDeleteModal(true)
   }
 
+  // Populate all subjects with default prices
+  const handlePopulateAllSubjects = async () => {
+    if (!window.confirm('هل تريد إنشاء جميع المواد (19 مادة × 3 مراحل = 57 سعر) بالأسعار الافتراضية (50 ₪)؟')) {
+      return
+    }
+
+    setIsPopulating(true)
+    setError('')
+    setSuccess('')
+    
+    const educationLevels = ['elementary', 'middle', 'secondary']
+    const allSubjects = Object.keys(subjectLabels)
+    let successCount = 0
+    let errorCount = 0
+    const errors = []
+
+    try {
+      for (const subject of allSubjects) {
+        for (const level of educationLevels) {
+          try {
+            // Send Arabic/Hebrew subject name to backend
+            const subjectLabel = subjectLabels[subject] // Get Arabic/Hebrew label
+            await pricingService.createPricing({
+              subject: subjectLabel, // Send Arabic/Hebrew name (e.g., "عربي", "رياضيات")
+              education_level: level,
+              individual_price: DEFAULT_INDIVIDUAL_PRICE,
+              group_price: DEFAULT_GROUP_PRICE
+            })
+            successCount++
+          } catch (err) {
+            // If pricing already exists, skip it
+            if (err.response?.status === 400 || err.response?.status === 409) {
+              // Pricing already exists, skip
+            } else {
+              errorCount++
+              errors.push(`${subjectLabels[subject]} - ${level}: ${err.response?.data?.detail || 'خطأ غير معروف'}`)
+            }
+          }
+        }
+      }
+
+      let message = `تم إنشاء ${successCount} سعر بنجاح!`
+      if (errorCount > 0) {
+        message += ` (${errorCount} فشل - قد تكون موجودة مسبقاً)`
+      }
+      setSuccess(message)
+      
+      if (errors.length > 0 && errorCount > 5) {
+        console.error('بعض الأخطاء:', errors.slice(0, 5))
+      }
+      
+      // Refresh the pricing list
+      await fetchPricing()
+    } catch (err) {
+      setError('حدث خطأ أثناء إنشاء الأسعار')
+    } finally {
+      setIsPopulating(false)
+    }
+  }
+
   return (
     <div className="pricing-page pricing-page-mobile">
       <div className="page-header">
         <h1 className="page-title">إدارة الأسعار</h1>
-        <Button onClick={() => { resetForm(); setShowCreateModal(true) }}>
-          + إضافة
-        </Button>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', width: '100%' }}>
+          <Button 
+            onClick={handlePopulateAllSubjects}
+            disabled={isPopulating}
+            variant="secondary"
+            style={{ width: '100%' }}
+          >
+            {isPopulating ? 'جاري الإنشاء...' : '⚡ إنشاء جميع المواد (50 ₪)'}
+          </Button>
+          <Button onClick={() => { resetForm(); setShowCreateModal(true) }} style={{ width: '100%' }}>
+            + إضافة
+          </Button>
+        </div>
       </div>
 
       {success && (
@@ -278,13 +338,14 @@ const PricingPageMobile = () => {
       <Modal isOpen={showCreateModal} onClose={() => { setShowCreateModal(false); resetForm() }} title="إضافة سعر جديد">
         {modalError && <Alert type="error" message={modalError} />}
         <form onSubmit={handleCreate} className="pricing-form">
-          <Input
+          <Select
             name="subject"
             label="المادة *"
             value={formData.subject}
             onChange={(e) => setFormData({ ...formData, subject: e.target.value })}
             required
-            placeholder="أدخل اسم المادة (مثال: Mathematics، Arabic، Physics)"
+            options={getSubjectOptions()}
+            placeholder="اختر المادة"
           />
           
           <Select
