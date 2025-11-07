@@ -115,6 +115,8 @@ const LessonsPageMobile = () => {
   const getStatusBadgeClass = (status) => {
     switch (status) {
       case 'pending': return 'status-badge status-pending'
+      case 'approved': return 'status-badge status-approved'
+      case 'rejected': return 'status-badge status-rejected'
       case 'completed': return 'status-badge status-completed'
       case 'cancelled': return 'status-badge status-cancelled'
       default: return 'status-badge'
@@ -125,6 +127,8 @@ const LessonsPageMobile = () => {
   const getStatusText = (status) => {
     switch (status) {
       case 'pending': return 'معلق'
+      case 'approved': return 'موافق عليه'
+      case 'rejected': return 'مرفوض'
       case 'completed': return 'مكتمل'
       case 'cancelled': return 'ملغي'
       default: return status
@@ -158,7 +162,8 @@ const LessonsPageMobile = () => {
           >
             <option value="all">جميع الحالات</option>
             <option value="pending">معلق</option>
-            <option value="completed">مكتمل</option>
+            <option value="approved">موافق عليه</option>
+            <option value="rejected">مرفوض</option>
             <option value="cancelled">ملغي</option>
           </select>
         </div>

@@ -45,7 +45,7 @@ const DashboardPageDesktop = () => {
       }
       
       const lessonsData = await lessonService.getMyLessons(filters)
-      const lessons = lessonsData.lessons || []
+      const lessons = (lessonsData.lessons || []).filter((lesson) => ['approved', 'completed'].includes(lesson.status))
       
       // Calculate stats from filtered lessons
       const stats = calculateStats(lessons)

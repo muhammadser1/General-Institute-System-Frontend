@@ -217,9 +217,8 @@ const LessonsPageDesktop = () => {
           >
             <option value="all">جميع الحالات</option>
             <option value="pending">معلق</option>
-            {isAdmin && <option value="approved">موافق عليه</option>}
-            {isAdmin && <option value="rejected">مرفوض</option>}
-            <option value="completed">مكتمل</option>
+            <option value="approved">موافق عليه</option>
+            <option value="rejected">مرفوض</option>
             <option value="cancelled">ملغي</option>
           </select>
         </div>
