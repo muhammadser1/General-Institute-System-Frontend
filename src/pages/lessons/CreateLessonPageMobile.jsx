@@ -87,6 +87,32 @@ const CreateLessonPageMobile = () => {
     try {
       // Validate that at least one student is selected
       const validStudents = formData.students.filter(s => s.student_id && s.student_name.trim() !== '')
+      const uniqueStudentIds = new Set(validStudents.map(s => s.student_id))
+      
+      if (uniqueStudentIds.size !== validStudents.length) {
+        setError('لا يمكن إضافة نفس الطالب أكثر من مرة')
+        setLoading(false)
+        return
+      }
+      
+      if (formData.lesson_type === 'group' && validStudents.length < 2) {
+        setError('يجب اختيار طالبين على الأقل للدروس الجماعية')
+        setLoading(false)
+        return
+      }
+      
+      if (formData.lesson_type === 'individual') {
+        if (validStudents.length !== 1) {
+          setError('يجب اختيار طالب واحد فقط للدروس الفردية')
+          setLoading(false)
+          return
+        }
+        if (formData.students.length > 1) {
+          setError('لا يمكن إضافة أكثر من طالب واحد في الدروس الفردية')
+          setLoading(false)
+          return
+        }
+      }
       
       if (validStudents.length === 0) {
         setError('يجب اختيار طالب واحد على الأقل')

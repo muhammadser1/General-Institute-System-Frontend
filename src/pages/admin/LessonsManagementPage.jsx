@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { useAuth } from '../../contexts/AuthContext'
 import { exportLessonsToPDF } from '../../utils/pdfExport'
+import Alert from '../../components/common/Alert'
 import Button from '../../components/common/Button'
 import '../../styles/pages/admin/LessonsManagementPage.css'
 import api from '../../services/api'
@@ -13,9 +14,11 @@ const LessonsManagementPage = () => {
   const [rejectedLessons, setRejectedLessons] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
+  const [success, setSuccess] = useState(null)
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedMonth, setSelectedMonth] = useState(new Date().toISOString().slice(0, 7))
   const [enableMonthFilter, setEnableMonthFilter] = useState(true)
+  const [bulkApproving, setBulkApproving] = useState(false)
 
   const formatDuration = (minutes) => {
     if (minutes == null || isNaN(minutes)) return '-'
@@ -158,7 +161,42 @@ const LessonsManagementPage = () => {
     lesson.student_name?.toLowerCase().includes(searchQuery.toLowerCase())
   )
 
+  const approveLesson = async (lessonId, token) => {
+    const authToken = token || localStorage.getItem('access_token')
+    
+    if (!authToken) {
+      throw new Error('لم يتم العثور على رمز المصادقة. الرجاء تسجيل الدخول.')
+    }
+
+    const response = await fetch(`https://general-institute-system-backend.onrender.com/api/v1/lessons/admin/approve/${lessonId}`, {
+      method: 'PUT',
+      headers: {
+        'Authorization': `Bearer ${authToken}`,
+        'Content-Type': 'application/json'
+      }
+    })
+
+    if (!response.ok) {
+      let errorMessage = 'فشل في الموافقة على الدرس'
+      try {
+        const errorData = await response.json()
+        errorMessage = errorData.detail || errorMessage
+      } catch (_) {
+        // ignore parse error
+      }
+      throw new Error(errorMessage)
+    }
+
+    const approvedLesson = pendingLessons.find(l => l.id === lessonId)
+    if (approvedLesson) {
+      setPendingLessons(prev => prev.filter(lesson => lesson.id !== lessonId))
+      setLessons(prev => [...prev, { ...approvedLesson, status: 'approved' }])
+    }
+  }
+
   const handleApprove = async (lessonId) => {
+    setError(null)
+    setSuccess(null)
     const token = localStorage.getItem('access_token')
     
     if (!token) {
@@ -168,32 +206,51 @@ const LessonsManagementPage = () => {
 
     try {
       console.log(`✅ Approving lesson: ${lessonId}`)
-      
-      const response = await fetch(`https://general-institute-system-backend.onrender.com/api/v1/lessons/admin/approve/${lessonId}`, {
-        method: 'PUT',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
-      })
-
-      if (!response.ok) {
-        const errorData = await response.json()
-        throw new Error(errorData.detail || 'فشل في الموافقة على الدرس')
-      }
-
+      await approveLesson(lessonId, token)
       console.log('✅ Lesson approved successfully')
-      
-      // Update local state
-      const approvedLesson = pendingLessons.find(l => l.id === lessonId)
-      if (approvedLesson) {
-        setPendingLessons(prev => prev.filter(lesson => lesson.id !== lessonId))
-        setLessons(prev => [...prev, { ...approvedLesson, status: 'approved' }])
-      }
+      setSuccess('تمت الموافقة على الدرس بنجاح')
     } catch (error) {
       console.error('❌ Error approving lesson:', error)
       setError(error.message || 'حدث خطأ أثناء الموافقة على الدرس')
+      setSuccess(null)
     }
+  }
+
+  const handleApproveAll = async () => {
+    const token = localStorage.getItem('access_token')
+    
+    if (!token) {
+      setError('لم يتم العثور على رمز المصادقة. الرجاء تسجيل الدخول.')
+      return
+    }
+
+    if (filteredPendingLessons.length === 0) {
+      return
+    }
+
+    setError(null)
+    setSuccess(null)
+    setBulkApproving(true)
+
+    const lessonIds = filteredPendingLessons.map(lesson => lesson.id)
+    let hasError = false
+
+    for (const lessonId of lessonIds) {
+      try {
+        await approveLesson(lessonId, token)
+      } catch (err) {
+        hasError = true
+        console.error('❌ Error approving lesson in bulk:', err)
+        setError(err.message || 'حدث خطأ أثناء الموافقة على أحد الدروس')
+        break
+      }
+    }
+
+    if (!hasError) {
+      setSuccess('تمت الموافقة على جميع الدروس المعلقة المعروضة')
+    }
+
+    setBulkApproving(false)
   }
 
   const handleReject = async (lessonId) => {
@@ -235,6 +292,14 @@ const LessonsManagementPage = () => {
       <header className="overview-header">
         <h1 className="title">إدارة الدروس</h1>
         <div style={{ display: 'flex', gap: '1rem', marginLeft: 'auto' }}>
+          {activeTab === 'pending' && filteredPendingLessons.length > 0 && (
+            <Button
+              onClick={handleApproveAll}
+              disabled={bulkApproving}
+            >
+              {bulkApproving ? 'جاري الموافقة...' : 'موافقة على الكل'}
+            </Button>
+          )}
           {activeTab === 'all' && filteredLessons.length > 0 && (
             <Button
               onClick={async () => {
@@ -282,6 +347,15 @@ const LessonsManagementPage = () => {
           )}
         </div>
       </header>
+
+      <div style={{ margin: '1rem 0' }}>
+        {success && (
+          <Alert type="success" message={success} onClose={() => setSuccess(null)} />
+        )}
+        {error && (
+          <Alert type="error" message={error} onClose={() => setError(null)} />
+        )}
+      </div>
 
       <div className="filter-section">
         <label htmlFor="month">اختر الشهر:</label>

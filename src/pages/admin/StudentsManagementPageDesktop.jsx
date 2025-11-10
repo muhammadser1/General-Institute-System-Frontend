@@ -14,6 +14,7 @@ const StudentsManagementPageDesktop = () => {
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
   const [modalError, setModalError] = useState('')
+  const [isSubmitting, setIsSubmitting] = useState(false)
   
   // Filters
   const [searchQuery, setSearchQuery] = useState('')
@@ -62,11 +63,35 @@ const StudentsManagementPageDesktop = () => {
   })
 
   // Handle create student
+  const isDuplicateName = (name, excludeId = null) => {
+    if (!name) return false
+    const normalizedName = name.trim().toLowerCase()
+    return students.some(student => {
+      if (!student.full_name) return false
+      if (excludeId && student.id === excludeId) return false
+      return student.full_name.trim().toLowerCase() === normalizedName
+    })
+  }
+
   const handleCreate = async (e) => {
     e.preventDefault()
     setModalError('')
+    if (isSubmitting) return
+    const trimmedName = formData.full_name.trim()
+
+    if (!trimmedName) {
+      setModalError('يرجى إدخال اسم الطالب')
+      return
+    }
+
+    if (isDuplicateName(trimmedName)) {
+      setModalError('اسم الطالب موجود بالفعل')
+      return
+    }
+
+    setIsSubmitting(true)
     try {
-      await studentService.createStudent(formData)
+      await studentService.createStudent({ ...formData, full_name: trimmedName })
       setSuccess('تم إضافة الطالب بنجاح')
       setShowCreateModal(false)
       resetForm()
@@ -82,6 +107,8 @@ const StudentsManagementPageDesktop = () => {
       }
       
       setModalError(errorMessage)
+    } finally {
+      setIsSubmitting(false)
     }
   }
 
@@ -89,8 +116,22 @@ const StudentsManagementPageDesktop = () => {
   const handleEdit = async (e) => {
     e.preventDefault()
     setModalError('')
+    if (isSubmitting) return
+    const trimmedName = formData.full_name.trim()
+
+    if (!trimmedName) {
+      setModalError('يرجى إدخال اسم الطالب')
+      return
+    }
+
+    if (isDuplicateName(trimmedName, selectedStudent?.id)) {
+      setModalError('اسم الطالب موجود بالفعل')
+      return
+    }
+
+    setIsSubmitting(true)
     try {
-      await studentService.updateStudent(selectedStudent.id, formData)
+      await studentService.updateStudent(selectedStudent.id, { ...formData, full_name: trimmedName })
       setSuccess('تم تحديث الطالب بنجاح')
       setShowEditModal(false)
       resetForm()
@@ -106,6 +147,8 @@ const StudentsManagementPageDesktop = () => {
       }
       
       setModalError(errorMessage)
+    } finally {
+      setIsSubmitting(false)
     }
   }
 
@@ -297,10 +340,10 @@ const StudentsManagementPageDesktop = () => {
             />
           </div>
           <div className="form-actions">
-            <Button type="button" variant="secondary" onClick={() => { setShowCreateModal(false); resetForm() }}>
+            <Button type="button" variant="secondary" onClick={() => { if (!isSubmitting) { setShowCreateModal(false); resetForm() } }}>
               إلغاء
             </Button>
-            <Button type="submit" variant="primary">
+            <Button type="submit" variant="primary" disabled={isSubmitting}>
               إضافة
             </Button>
           </div>
@@ -345,10 +388,10 @@ const StudentsManagementPageDesktop = () => {
             />
           </div>
           <div className="form-actions">
-            <Button type="button" variant="secondary" onClick={() => { setShowEditModal(false); resetForm() }}>
+            <Button type="button" variant="secondary" onClick={() => { if (!isSubmitting) { setShowEditModal(false); resetForm() } }}>
               إلغاء
             </Button>
-            <Button type="submit" variant="primary">
+            <Button type="submit" variant="primary" disabled={isSubmitting}>
               حفظ التغييرات
             </Button>
           </div>
